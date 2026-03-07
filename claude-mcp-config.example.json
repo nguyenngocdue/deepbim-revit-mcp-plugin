@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "deepbim-mcp-server": {
+      "command": "node",
+      "args": [
+        "E:\\C# Tool Revit\\revit-mcp\\mcp-addin\\revit-mcp-plugin\\server\\build\\index.js"
+      ]
+    }
+  }
+}

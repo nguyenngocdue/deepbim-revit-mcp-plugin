@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>DeepBim-MCP</Name>
+    <Assembly>revit_mcp_plugin/RevitMCPPlugin.dll</Assembly>
+    <FullClassName>revit_mcp_plugin.Core.Application</FullClassName>
+    <ClientId>7A3B8C2D-4E5F-6A7B-8C9D-0E1F2A3B4C5D</ClientId>
+    <VendorId>DeepBim-MCP</VendorId>
+    <VendorDescription>DeepBim-MCP - AI-Powered BIM Automation for Revit</VendorDescription>
+  </AddIn>
+</RevitAddIns>

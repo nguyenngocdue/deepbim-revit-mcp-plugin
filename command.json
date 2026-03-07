@@ -1,0 +1,25 @@
+{
+  "name": "RevitMCPCommandSet",
+  "description": "Command set for DeepBim-MCP",
+  "developer": {
+    "name": "DeepBim-MCP",
+    "organization": "DeepBim"
+  },
+  "commands": [
+    {
+      "commandName": "say_hello",
+      "description": "Displays a greeting dialog in Revit (connection test)",
+      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_view_info",
+      "description": "Get current active view information",
+      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_selected_elements",
+      "description": "Get currently selected elements in Revit",
+      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll"
+    }
+  ]
+}

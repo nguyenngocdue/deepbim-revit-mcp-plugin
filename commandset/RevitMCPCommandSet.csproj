@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <UseWPF>true</UseWPF>
+        <LangVersion>latest</LangVersion>
+        <PlatformTarget>x64</PlatformTarget>
+        <ImplicitUsings>true</ImplicitUsings>
+        <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <StartAction>Program</StartAction>
+        <StartProgram>C:\Program Files\Autodesk\Revit 2025\Revit.exe</StartProgram>
+        <StartArguments>/language ENG</StartArguments>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3">
+            <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2025.*" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.*" />
+        <PackageReference Include="RevitMCPSDK" Version="2025.*" />
+    </ItemGroup>
+
+    <!-- Post-build: copy CommandSet DLLs into plugin's AddIn layout + generate registry -->
+    <Target Name="DeployCommandSet" AfterTargets="Build">
+        <PropertyGroup>
+            <PluginAddInRoot>$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit_mcp_plugin\</PluginAddInRoot>
+            <CommandSetPluginDir>$(PluginAddInRoot)Commands\RevitMCPCommandSet\</CommandSetPluginDir>
+            <RegistryFile>$(PluginAddInRoot)Commands\commandRegistry.json</RegistryFile>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <CommandSetBinaries Include="$(TargetDir)*.dll;$(TargetDir)*.pdb" />
+            <CommandJsonFile Include="$(ProjectDir)..\command.json" />
+        </ItemGroup>
+
+        <!-- Copy DLLs and command.json -->
+        <MakeDir Directories="$(CommandSetPluginDir)2025" />
+        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(CommandSetPluginDir)2025\" />
+        <Copy SourceFiles="@(CommandJsonFile)" DestinationFolder="$(CommandSetPluginDir)" />
+
+        <!-- Plugin expects commandRegistry.json at Commands\ - copy from command.json (single source of truth) -->
+        <MakeDir Directories="$(PluginAddInRoot)Commands" />
+        <Copy SourceFiles="@(CommandJsonFile)" DestinationFiles="$(RegistryFile)" />
+
+        <!-- Deploy to Revit Addins folder for automatic loading (Debug only) -->
+        <PropertyGroup>
+            <RevitAddinsRoot>$(AppData)\Autodesk\Revit\Addins\2025\</RevitAddinsRoot>
+        </PropertyGroup>
+        <Copy SourceFiles="$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit-mcp-plugin.addin" DestinationFolder="$(RevitAddinsRoot)" Condition="$(Configuration.Contains('Debug')) And Exists('$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit-mcp-plugin.addin')" />
+        <ItemGroup>
+            <AddInFiles Include="$(PluginAddInRoot)**\*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(AddInFiles)" DestinationFiles="@(AddInFiles->'$(RevitAddinsRoot)revit_mcp_plugin\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="$(Configuration.Contains('Debug'))" />
+    </Target>
+</Project>

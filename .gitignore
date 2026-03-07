@@ -1,0 +1,13 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+server/build/
+server/node_modules/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Logs
+*.log
