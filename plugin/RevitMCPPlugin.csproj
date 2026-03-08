@@ -26,6 +26,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Resource Include="Resources\icon.png" />
+    </ItemGroup>
+    <ItemGroup>
         <None Update="revit-mcp-plugin.addin">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

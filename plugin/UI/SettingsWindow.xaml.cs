@@ -1,31 +1,50 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shell;
 
 namespace revit_mcp_plugin.UI
 {
     public partial class SettingsWindow : Window
     {
-        private CommandSetSettingsPage commandSetPage;
-        private bool isInitialized = false;
-
         public SettingsWindow()
         {
             InitializeComponent();
-
-            commandSetPage = new CommandSetSettingsPage();
-            ContentFrame.Navigate(commandSetPage);
-
-            isInitialized = true;
+            var chrome = new WindowChrome
+            {
+                CornerRadius = new CornerRadius(10),
+                CaptionHeight = 44,
+                ResizeBorderThickness = new Thickness(6)
+            };
+            WindowChrome.SetWindowChrome(this, chrome);
+            ContentFrame.Navigate(new CommandSetSettingsPage());
+            Loaded += OnLoaded;
+            RootBorder.SizeChanged += (s, _) => UpdateClip();
         }
 
-        private void NavListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void UpdateClip()
         {
-            if (!isInitialized) return;
+            if (RootBorder.ActualWidth <= 0 || RootBorder.ActualHeight <= 0) return;
+            RootBorder.Clip = new RectangleGeometry(
+                new Rect(0, 0, RootBorder.ActualWidth, RootBorder.ActualHeight), 10, 10);
+        }
 
-            if (NavListBox.SelectedItem == CommandSetItem)
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            UpdateClip();
+            try
             {
-                ContentFrame.Navigate(commandSetPage);
+                var uri = new System.Uri("pack://application:,,,/RevitMCPPlugin;component/Resources/icon.png", System.UriKind.Absolute);
+                TitleBarIcon.Source = BitmapFrame.Create(uri);
+                Icon = BitmapFrame.Create(uri);
             }
+            catch { /* icon optional */ }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }

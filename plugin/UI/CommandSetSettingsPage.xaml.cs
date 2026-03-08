@@ -4,11 +4,13 @@ using revit_mcp_plugin.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace revit_mcp_plugin.UI
 {
@@ -27,8 +29,50 @@ namespace revit_mcp_plugin.UI
             CommandSetListBox.ItemsSource = commandSets;
             FeaturesListView.ItemsSource = currentCommands;
 
+            FeaturesListView.Loaded += (s, _) => UpdateDescriptionColumnWidth();
+            FeaturesListView.SizeChanged += (s, _) => UpdateDescriptionColumnWidth();
+
             LoadCommandSets();
-            NoSelectionTextBlock.Visibility = Visibility.Visible;
+            if (commandSets.Count > 0)
+                CommandSetListBox.SelectedIndex = 0;
+            NoSelectionTextBlock.Visibility = commandSets.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private const double OnColumnWidth = 44;
+        private const double CommandColumnWidth = 180;
+        private void UpdateDescriptionColumnWidth()
+        {
+            if (FeaturesListView.ActualWidth <= 0) return;
+            double remaining = FeaturesListView.ActualWidth - OnColumnWidth - CommandColumnWidth - 24; // 24 = scrollbar/margin
+            DescriptionColumn.Width = Math.Max(200, remaining);
+        }
+
+        private void UpdateEnabledCount()
+        {
+            if (currentCommands == null || currentCommands.Count == 0)
+            {
+                EnabledCountTextBlock.Text = "";
+                return;
+            }
+            int n = currentCommands.Count(c => c.Enabled);
+            EnabledCountTextBlock.Text = n == currentCommands.Count ? "All enabled" : $"{n} enabled";
+        }
+
+        private void ApplySearchFilter()
+        {
+            var view = CollectionViewSource.GetDefaultView(FeaturesListView.ItemsSource);
+            if (view == null) return;
+            string q = SearchBox?.Text?.Trim().ToUpperInvariant() ?? "";
+            view.Filter = string.IsNullOrEmpty(q)
+                ? null
+                : (Predicate<object>)(obj => obj is CommandConfig c &&
+                    ((c.CommandName ?? "").ToUpperInvariant().Contains(q) ||
+                     (c.Description ?? "").ToUpperInvariant().Contains(q)));
+        }
+
+        private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            ApplySearchFilter();
         }
 
         private void LoadCommandSets()
@@ -164,20 +208,39 @@ namespace revit_mcp_plugin.UI
 
         private void CommandSetListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            UnsubscribeCommandConfigEvents();
             currentCommands.Clear();
             var selected = CommandSetListBox.SelectedItem as CommandSetInfo;
             if (selected != null)
             {
                 NoSelectionTextBlock.Visibility = Visibility.Collapsed;
-                FeaturesHeaderTextBlock.Text = $"{selected.Name} - Commands";
+                FeaturesHeaderTextBlock.Text = $"{selected.Name}";
                 foreach (var cmd in selected.Commands)
+                {
                     currentCommands.Add(cmd);
+                    cmd.PropertyChanged += CommandConfig_PropertyChanged;
+                }
+                ApplySearchFilter();
+                UpdateEnabledCount();
             }
             else
             {
                 NoSelectionTextBlock.Visibility = Visibility.Visible;
-                FeaturesHeaderTextBlock.Text = "Command List";
+                FeaturesHeaderTextBlock.Text = "Commands";
+                EnabledCountTextBlock.Text = "";
             }
+        }
+
+        private void UnsubscribeCommandConfigEvents()
+        {
+            foreach (var cmd in currentCommands.OfType<CommandConfig>())
+                cmd.PropertyChanged -= CommandConfig_PropertyChanged;
+        }
+
+        private void CommandConfig_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CommandConfig.Enabled))
+                UpdateEnabledCount();
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -192,12 +255,14 @@ namespace revit_mcp_plugin.UI
         {
             foreach (var cmd in currentCommands) cmd.Enabled = true;
             FeaturesListView.Items.Refresh();
+            UpdateEnabledCount();
         }
 
         private void UnselectAllButton_Click(object sender, RoutedEventArgs e)
         {
             foreach (var cmd in currentCommands) cmd.Enabled = false;
             FeaturesListView.Items.Refresh();
+            UpdateEnabledCount();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
