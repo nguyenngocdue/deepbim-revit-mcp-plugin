@@ -11,7 +11,7 @@ namespace revit_mcp_plugin.UI
     {
         private readonly UIApplication _uiApp;
 
-        private static readonly SolidColorBrush GreenBrush = new SolidColorBrush(Color.FromRgb(0x2E, 0xCC, 0x40));
+        private static readonly SolidColorBrush AccentBrush = new SolidColorBrush(Color.FromRgb(0x59, 0xDC, 0xCB));
         private static readonly SolidColorBrush RedBrush = new SolidColorBrush(Color.FromRgb(0xCC, 0x33, 0x33));
         private static readonly SolidColorBrush GrayBrush = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC));
 
@@ -37,7 +37,7 @@ namespace revit_mcp_plugin.UI
                         service.Start();
                         if (service.IsRunning)
                         {
-                            AppendLog($">>> Auto-started on port {service.Port} (tool co the ket noi ngay) <<<");
+                            AppendLog($">>> Auto-started on port {service.Port} (tools can connect now) <<<");
                             RefreshStatus();
                         }
                     }
@@ -63,9 +63,9 @@ namespace revit_mcp_plugin.UI
 
             if (running)
             {
-                StatusIndicator.Fill = GreenBrush;
+                StatusIndicator.Fill = AccentBrush;
                 StatusText.Text = "Running";
-                StatusText.Foreground = GreenBrush;
+                StatusText.Foreground = AccentBrush;
                 StartButton.IsEnabled = false;
                 StartButton.Opacity = 0.4;
                 StopButton.IsEnabled = true;

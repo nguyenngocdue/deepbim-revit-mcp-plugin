@@ -8,9 +8,11 @@ namespace revit_mcp_plugin.Core
 {
     public class Application : IExternalApplication
     {
+        private const string TabName = "DeepBim-MCP";
+        private const string PanelName = "Server";
+
         public Result OnStartup(UIControlledApplication application)
         {
-            // Record add-in directory on load (avoids Assembly.Location empty/temp when opening Settings)
             try
             {
                 string loc = Assembly.GetExecutingAssembly().Location;
@@ -23,14 +25,22 @@ namespace revit_mcp_plugin.Core
             }
             catch { }
 
-            RibbonPanel mcpPanel = application.CreateRibbonPanel("DeepBim-MCP");
+            try
+            {
+                application.CreateRibbonTab(TabName);
+            }
+            catch { /* tab may already exist */ }
+
+            RibbonPanel mcpPanel = application.CreateRibbonPanel(TabName, PanelName);
 
             PushButtonData toggleButton = new PushButtonData(
                 "ID_TOGGLE_MCP",
-                "MCP\r\nSwitch",
+                "Connect\r\nServer",
                 Assembly.GetExecutingAssembly().Location,
                 "revit_mcp_plugin.Core.MCPServiceConnection");
-            toggleButton.ToolTip = "Start / Stop MCP server";
+            toggleButton.ToolTip = "Start or stop MCP server connection";
+            toggleButton.LargeImage = RibbonIconHelper.GetLargeImage("mcp");
+            toggleButton.Image = RibbonIconHelper.GetSmallImage("mcp");
             mcpPanel.AddItem(toggleButton);
 
             PushButtonData settingsButton = new PushButtonData(
@@ -39,6 +49,8 @@ namespace revit_mcp_plugin.Core
                 Assembly.GetExecutingAssembly().Location,
                 "revit_mcp_plugin.Core.Settings");
             settingsButton.ToolTip = "MCP Plugin Settings";
+            settingsButton.LargeImage = RibbonIconHelper.GetLargeImage("settings");
+            settingsButton.Image = RibbonIconHelper.GetSmallImage("settings");
             mcpPanel.AddItem(settingsButton);
 
             return Result.Succeeded;

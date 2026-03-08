@@ -131,6 +131,17 @@ namespace revit_mcp_plugin.Utils
         }
 
         /// <summary>
+        /// Returns true when running in deploy mode (not dev). When true, the plugin can show a dedicated DeepBim-MCP tab and styled UI.
+        /// </summary>
+        public static bool IsDeployMode()
+        {
+            string assemblyDir = GetAssemblyDirectory();
+            if (string.IsNullOrEmpty(assemblyDir)) return true;
+            string mode = TryReadEnvMode(assemblyDir);
+            return !string.Equals(mode, "dev", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
         /// Returns true if the path is a writable plugin root (not under Program Files or dotnet runtime).
         /// </summary>
         private static bool IsWritablePluginPath(string dir)
