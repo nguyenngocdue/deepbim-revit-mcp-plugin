@@ -72,9 +72,19 @@ Or copy the contents of `plugin\bin\AddIn 2025 Debug\` to:
 ### 3. Start Revit
 
 1. Open Revit 2025 and load a project
-2. Go to **Add-Ins** tab → **DeepBim-MCP** → click **MCP Switch**
-3. In the control window, click **Start** (or it auto-starts)
-4. Verify status shows **Running** on port 8080 (or 8081–8099)
+2. Go to **Add-Ins** tab → **DeepBim-MCP** → click **Connect Server**
+3. In the **DeepBim-MCP Server Control** window, click **Start** (or it auto-starts)
+4. Verify status shows **Running** and the port (e.g. 8081)
+
+![DeepBim-MCP Server Control](images/MCP%20Server%20Control.png)
+
+*DeepBim-MCP Server Control — trạng thái server, port, đường dẫn plugin và log.*
+
+5. (Tùy chọn) Mở **Settings** để bật/tắt từng command set và từng lệnh MCP.
+
+![DeepBim-MCP Settings](images/MCP-Settings.png)
+
+*DeepBim-MCP Settings — Command Set Settings: chọn command set, bật/tắt từng command.*
 
 ### 4. Configure Claude Desktop
 
