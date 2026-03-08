@@ -15,10 +15,14 @@ namespace revit_mcp_plugin.Core
 
         private const string SegoeMdl2 = "Segoe MDL2 Assets";
 
-        // Segoe MDL2 Assets: Power = On/Off, Setting = gear, Export
+        // Segoe MDL2 Assets: Power, Setting, Export, Test tools
         private const string GlyphConnect = "\uE7E8"; // Power (On/Off)
         private const string GlyphSettings = "\uE713"; // Setting
-        private const string GlyphExport = "\uE8B5";  // Export (document/arrow)
+        private const string GlyphExport = "\uE8B5";  // Export
+        private const string GlyphTestHello = "\uE134";  // Chat (Say Hello)
+        private const string GlyphTestView = "\uE8A1";   // ViewDashboard (View Info)
+        private const string GlyphTestRoom = "\uE10F";   // Home (Room Data)
+        private const string GlyphTestSheet = "\uE729";  // Page/Document (Sheet Props)
 
         public static BitmapSource GetLargeImage(string kind = "mcp")
         {
@@ -34,6 +38,10 @@ namespace revit_mcp_plugin.Core
         {
             string glyph = kind == "settings" ? GlyphSettings
                 : kind == "export" ? GlyphExport
+                : kind == "test_hello" ? GlyphTestHello
+                : kind == "test_view" ? GlyphTestView
+                : kind == "test_room" ? GlyphTestRoom
+                : kind == "test_sheet" ? GlyphTestSheet
                 : GlyphConnect;
             var dv = new DrawingVisual();
             using (var dc = dv.RenderOpen())

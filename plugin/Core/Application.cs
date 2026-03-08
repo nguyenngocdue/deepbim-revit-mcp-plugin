@@ -65,7 +65,26 @@ namespace revit_mcp_plugin.Core
             exportSheetsButton.Image = RibbonIconHelper.GetSmallImage("export");
             toolsPanel.AddItem(exportSheetsButton);
 
+            string toolsDllPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "CommandDeepBimMCPTools.dll");
+            if (File.Exists(toolsDllPath))
+            {
+                AddTestCommand(toolsPanel, toolsDllPath, "Test Say Hello", "DeepBimMCPTools.TestSayHelloCommand", "ID_TEST_SAY_HELLO", "test_hello");
+                AddTestCommand(toolsPanel, toolsDllPath, "Test View Info", "DeepBimMCPTools.TestGetCurrentViewInfoCommand", "ID_TEST_VIEW_INFO", "test_view");
+                AddTestCommand(toolsPanel, toolsDllPath, "Test Room Data", "DeepBimMCPTools.TestExportRoomDataCommand", "ID_TEST_ROOM_DATA", "test_room");
+                AddTestCommand(toolsPanel, toolsDllPath, "Test Sheet Props", "DeepBimMCPTools.TestGetSheetPropertiesCommand", "ID_TEST_SHEET_PROPS", "test_sheet");
+                AddTestCommand(toolsPanel, toolsDllPath, "Test Export Sheets", "DeepBimMCPTools.TestExportSheetsCommand", "ID_TEST_EXPORT_SHEETS", "export");
+            }
+
             return Result.Succeeded;
+        }
+
+        private static void AddTestCommand(RibbonPanel panel, string assemblyPath, string buttonText, string className, string id, string iconKind = "mcp")
+        {
+            var push = new PushButtonData(id, buttonText, assemblyPath, className);
+            push.ToolTip = "Test: " + buttonText + " (chạy trực tiếp trong Revit, không cần server)";
+            push.LargeImage = RibbonIconHelper.GetLargeImage(iconKind);
+            push.Image = RibbonIconHelper.GetSmallImage(iconKind);
+            panel.AddItem(push);
         }
 
         public Result OnShutdown(UIControlledApplication application)

@@ -25,6 +25,9 @@
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="ClosedXML" Version="0.104.1" />
     </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\tools\CommandDeepBimMCPTools.csproj" />
+    </ItemGroup>
 
     <ItemGroup>
         <Resource Include="Resources\icon.png" />
