@@ -11,14 +11,14 @@
 
     <PropertyGroup>
         <StartAction>Program</StartAction>
-        <StartProgram>C:\Program Files\Autodesk\Revit 2025\Revit.exe</StartProgram>
+        <StartProgram>$(RevitInstallPath)</StartProgram>
         <StartArguments>/language ENG</StartArguments>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2025.*" />
-        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.*" />
-        <PackageReference Include="RevitMCPSDK" Version="2025.*" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitVersion).*" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitVersion).*" />
+        <PackageReference Include="RevitMCPSDK" Version="$(RevitVersion).*" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3">
             <ExcludeAssets>runtime</ExcludeAssets>
         </PackageReference>
@@ -41,11 +41,11 @@
         </ItemGroup>
 
         <PropertyGroup>
-            <RootDir>bin\AddIn 2025 $(Configuration)\</RootDir>
+            <RootDir>bin\AddIn $(RevitVersion) $(BaseConfiguration)\</RootDir>
             <AddinDir>$(RootDir)revit_mcp_plugin\</AddinDir>
             <CommandsDir>$(AddinDir)Commands\</CommandsDir>
             <CommandSetDir>$(CommandsDir)RevitMCPCommandSet\</CommandSetDir>
-            <CommandSet2025Dir>$(CommandSetDir)2025\</CommandSet2025Dir>
+            <CommandSetVersionDir>$(CommandSetDir)$(RevitVersion)\</CommandSetVersionDir>
             <CommandJsonSrc>$(ProjectDir)..\command.json</CommandJsonSrc>
             <CommandSetBinDir>$(ProjectDir)..\commandset\bin\$(Configuration)\net8.0-windows10.0.19041.0\</CommandSetBinDir>
         </PropertyGroup>
@@ -53,30 +53,31 @@
         <!-- Plugin DLLs -->
         <Copy SourceFiles="@(RootItem)" DestinationFolder="$(RootDir)" />
         <Copy SourceFiles="@(AddinItem)" DestinationFolder="$(AddinDir)" />
+        <!-- Copy RevitVersions.json so PathManager can read revitVersions at runtime -->
+        <Copy SourceFiles="$(ProjectDir)..\RevitVersions.json" DestinationFolder="$(AddinDir)" Condition="Exists('$(ProjectDir)..\RevitVersions.json')" />
 
-        <!-- Dev env: khi chạy từ AddIn 2025 Debug, plugin đọc Commands ở đây -->
-        <Copy SourceFiles="$(ProjectDir)env.dev.json" DestinationFiles="$(AddinDir)deepbim-mcp.env.json" Condition="'$(Configuration)'=='Debug'" />
+        <!-- Dev: when running from AddIn folder, plugin loads Commands from here -->
+        <Copy SourceFiles="$(ProjectDir)env.dev.json" DestinationFiles="$(AddinDir)deepbim-mcp.env.json" Condition="'$(BaseConfiguration)'=='Debug'" />
 
-        <!-- Commands: giống cấu trúc deploy / Add-in Manager; thay {VERSION} bằng 2025 khi copy -->
-        <MakeDir Directories="$(CommandSet2025Dir)" />
+        <!-- Commands: replace {VERSION} with RevitVersion -->
+        <MakeDir Directories="$(CommandSetVersionDir)" />
         <PropertyGroup>
-            <_RevitVersion>2025</_RevitVersion>
             <_CommandJsonFull>$(ProjectDir)$(CommandSetDir)command.json</_CommandJsonFull>
             <_RegistryFull>$(ProjectDir)$(CommandsDir)commandRegistry.json</_RegistryFull>
         </PropertyGroup>
-        <Exec Command="powershell -NoProfile -Command &quot;$c = [System.IO.File]::ReadAllText('$(CommandJsonSrc)'); $c = $c -replace '\{VERSION\}', '$(_RevitVersion)'; [System.IO.File]::WriteAllText('$(ProjectDir)$(CommandSetDir)command.json', $c, [System.Text.UTF8Encoding]::new($false)); [System.IO.File]::WriteAllText('$(ProjectDir)$(CommandsDir)commandRegistry.json', $c, [System.Text.UTF8Encoding]::new($false))&quot;" Condition="Exists('$(CommandJsonSrc)')" WorkingDirectory="$(ProjectDir)" />
+        <Exec Command="powershell -NoProfile -Command &quot;$c = [System.IO.File]::ReadAllText('$(CommandJsonSrc)'); $c = $c -replace '\{VERSION\}', '$(RevitVersion)'; [System.IO.File]::WriteAllText('$(ProjectDir)$(CommandSetDir)command.json', $c, [System.Text.UTF8Encoding]::new($false)); [System.IO.File]::WriteAllText('$(ProjectDir)$(CommandsDir)commandRegistry.json', $c, [System.Text.UTF8Encoding]::new($false))&quot;" Condition="Exists('$(CommandJsonSrc)')" WorkingDirectory="$(ProjectDir)" />
         <ItemGroup Condition="Exists('$(CommandSetBinDir)RevitMCPCommandSet.dll')">
             <CommandSetBinaries Include="$(CommandSetBinDir)*.dll" />
             <CommandSetBinaries Include="$(CommandSetBinDir)*.pdb" />
         </ItemGroup>
-        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(CommandSet2025Dir)" Condition="Exists('$(CommandSetBinDir)RevitMCPCommandSet.dll')" />
+        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(CommandSetVersionDir)" Condition="Exists('$(CommandSetBinDir)RevitMCPCommandSet.dll')" />
 
-        <!-- Dev: ghi đường dẫn Commands (bin) vào AppData để Settings tìm được khi chạy từ Add-in Manager -->
-        <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+        <!-- Dev: write Commands path to AppData for Settings when running from Add-in Manager -->
+        <PropertyGroup Condition="'$(BaseConfiguration)'=='Debug'">
             <_DevCommandsPath>$([System.IO.Path]::GetFullPath('$(ProjectDir)$(CommandsDir)'))</_DevCommandsPath>
             <_DevPathFile>$(AppData)\DeepBim-MCP\dev-commands-path.txt</_DevPathFile>
         </PropertyGroup>
-        <MakeDir Directories="$(AppData)\DeepBim-MCP" Condition="'$(Configuration)'=='Debug'" />
-        <WriteLinesToFile File="$(AppData)\DeepBim-MCP\dev-commands-path.txt" Lines="$(_DevCommandsPath)" Overwrite="true" Condition="'$(Configuration)'=='Debug' And '$(_DevCommandsPath)'!=''" />
+        <MakeDir Directories="$(AppData)\DeepBim-MCP" Condition="'$(BaseConfiguration)'=='Debug'" />
+        <WriteLinesToFile File="$(AppData)\DeepBim-MCP\dev-commands-path.txt" Lines="$(_DevCommandsPath)" Overwrite="true" Condition="'$(BaseConfiguration)'=='Debug' And '$(_DevCommandsPath)'!=''" />
     </Target>
 </Project>

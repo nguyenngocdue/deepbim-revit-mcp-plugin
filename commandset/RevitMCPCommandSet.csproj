@@ -10,7 +10,7 @@
 
     <PropertyGroup>
         <StartAction>Program</StartAction>
-        <StartProgram>C:\Program Files\Autodesk\Revit 2025\Revit.exe</StartProgram>
+        <StartProgram>$(RevitInstallPath)</StartProgram>
         <StartArguments>/language ENG</StartArguments>
     </PropertyGroup>
 
@@ -19,11 +19,11 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3">
             <ExcludeAssets>runtime</ExcludeAssets>
         </PackageReference>
-        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2025.*" />
-        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.*" />
-        <PackageReference Include="Nice3point.Revit.Toolkit" Version="2025.*" />
-        <PackageReference Include="Nice3point.Revit.Extensions" Version="2025.*" />
-        <PackageReference Include="RevitMCPSDK" Version="2025.*" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitVersion).*" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitVersion).*" />
+        <PackageReference Include="Nice3point.Revit.Toolkit" Version="$(RevitVersion).*" />
+        <PackageReference Include="Nice3point.Revit.Extensions" Version="$(RevitVersion).*" />
+        <PackageReference Include="RevitMCPSDK" Version="$(RevitVersion).*" />
     </ItemGroup>
 
     <!-- Đọc build-mode.txt: Dev = chỉ copy vào bin; Deploy = copy thêm vào AppData -->
@@ -38,11 +38,12 @@
         </PropertyGroup>
     </Target>
 
-    <!-- Post-build: copy CommandSet vào bin; nếu mode=Deploy thì copy thêm vào AppData -->
+    <!-- Post-build: copy CommandSet to plugin bin; if mode=Deploy also copy to AppData -->
     <Target Name="DeployCommandSet" AfterTargets="Build" DependsOnTargets="ReadBuildMode">
         <PropertyGroup>
-            <PluginAddInRoot>$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit_mcp_plugin\</PluginAddInRoot>
+            <PluginAddInRoot>$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\revit_mcp_plugin\</PluginAddInRoot>
             <CommandSetPluginDir>$(PluginAddInRoot)Commands\RevitMCPCommandSet\</CommandSetPluginDir>
+            <CommandSetVersionDir>$(CommandSetPluginDir)$(RevitVersion)\</CommandSetVersionDir>
             <RegistryFile>$(PluginAddInRoot)Commands\commandRegistry.json</RegistryFile>
         </PropertyGroup>
 
@@ -51,17 +52,16 @@
             <CommandJsonFile Include="$(ProjectDir)..\command.json" />
         </ItemGroup>
 
-        <!-- Luôn copy vào bin\ (Dev + Deploy); thay {VERSION} bằng 2025 trong command.json / registry -->
-        <MakeDir Directories="$(CommandSetPluginDir)2025" />
+        <MakeDir Directories="$(CommandSetVersionDir)" />
         <MakeDir Directories="$(PluginAddInRoot)Commands" />
-        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(CommandSetPluginDir)2025\" />
-        <Exec Command="powershell -NoProfile -Command &quot;$c = [System.IO.File]::ReadAllText('$(ProjectDir)..\command.json'); $c = $c -replace '\{VERSION\}', '2025'; [System.IO.File]::WriteAllText('$(CommandSetPluginDir)command.json', $c, [System.Text.UTF8Encoding]::new($false)); [System.IO.File]::WriteAllText('$(RegistryFile)', $c, [System.Text.UTF8Encoding]::new($false))&quot;" Condition="Exists('$(ProjectDir)..\command.json')" />
+        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(CommandSetVersionDir)\" />
+        <Exec Command="powershell -NoProfile -Command &quot;$c = [System.IO.File]::ReadAllText('$(ProjectDir)..\command.json'); $c = $c -replace '\{VERSION\}', '$(RevitVersion)'; [System.IO.File]::WriteAllText('$(CommandSetPluginDir)command.json', $c, [System.Text.UTF8Encoding]::new($false)); [System.IO.File]::WriteAllText('$(RegistryFile)', $c, [System.Text.UTF8Encoding]::new($false))&quot;" Condition="Exists('$(ProjectDir)..\command.json')" />
 
-        <!-- Chỉ khi mode=Deploy: copy vào AppData -->
+        <!-- When mode=Deploy: copy to AppData -->
         <PropertyGroup>
-            <RevitAddinsRoot>$(AppData)\Autodesk\Revit\Addins\2025\</RevitAddinsRoot>
+            <RevitAddinsRoot>$(AppData)\Autodesk\Revit\Addins\$(RevitVersion)\</RevitAddinsRoot>
         </PropertyGroup>
-        <Copy SourceFiles="$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit-mcp-plugin.addin" DestinationFolder="$(RevitAddinsRoot)" Condition="'$(_CopyToAppData)'=='true' And Exists('$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit-mcp-plugin.addin')" />
+        <Copy SourceFiles="$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\revit-mcp-plugin.addin" DestinationFolder="$(RevitAddinsRoot)" Condition="'$(_CopyToAppData)'=='true' And Exists('$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\revit-mcp-plugin.addin')" />
         <ItemGroup>
             <AddInFiles Include="$(PluginAddInRoot)**\*" />
         </ItemGroup>

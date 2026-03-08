@@ -149,9 +149,9 @@ namespace revit_mcp_plugin.UI
                 if (commandSets.Count == 0)
                 {
                     string msg = "No command sets found.\n\n";
-                    msg += "• Dev: Build full solution (Plugin + RevitMCPCommandSet), then load add-in from Add-in Manager → plugin\\bin\\AddIn 2025 Debug.\n";
+                    msg += "• Dev: Build full solution (Plugin + RevitMCPCommandSet), then load add-in from Add-in Manager → plugin\\bin\\AddIn <version> Debug (version from RevitVersions.json).\n";
                     msg += "• Deploy: Run setup-revit-addin.ps1 to copy to AppData.\n\n";
-                    msg += "Check: Commands\\RevitMCPCommandSet\\command.json and Commands\\RevitMCPCommandSet\\2025\\RevitMCPCommandSet.dll.";
+                    msg += "Check: Commands\\RevitMCPCommandSet\\command.json and Commands\\RevitMCPCommandSet\\<version>\\RevitMCPCommandSet.dll.";
                     MessageBox.Show(msg, "No Command Sets", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }

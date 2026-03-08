@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <RevitVersion>2025</RevitVersion>
+    <RevitInstallPath>C:\Program Files\Autodesk\Revit 2025\Revit.exe</RevitInstallPath>
+  </PropertyGroup>
+</Project>

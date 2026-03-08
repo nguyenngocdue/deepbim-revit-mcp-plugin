@@ -155,12 +155,42 @@ namespace revit_mcp_plugin.Utils
         }
 
         /// <summary>
-        /// Gets the add-in folder in Revit Addins (e.g. %APPDATA%\Autodesk\Revit\Addins\2025\revit_mcp_plugin) if it exists.
+        /// Reads Revit versions to search from RevitVersions.json (next to the assembly) or returns default list.
+        /// </summary>
+        private static string[] GetRevitVersionsToSearch()
+        {
+            string dir = GetAssemblyDirectory();
+            if (!string.IsNullOrEmpty(dir))
+            {
+                string jsonPath = Path.Combine(dir, "RevitVersions.json");
+                try
+                {
+                    if (File.Exists(jsonPath))
+                    {
+                        string json = File.ReadAllText(jsonPath);
+                        var obj = JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(json);
+                        var arr = obj?["revitVersions"] as Newtonsoft.Json.Linq.JArray;
+                        if (arr != null && arr.Count > 0)
+                        {
+                            var list = arr.Select(t => t.ToString()).Where(s => !string.IsNullOrEmpty(s)).ToArray();
+                            if (list.Length > 0)
+                                return list;
+                        }
+                    }
+                }
+                catch { /* fallback to default */ }
+            }
+            return new[] { "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019" };
+        }
+
+        /// <summary>
+        /// Gets the add-in folder in Revit Addins (e.g. %APPDATA%\Autodesk\Revit\Addins\YYYY\revit_mcp_plugin) if it exists.
+        /// Versions to search come from RevitVersions.json when present.
         /// </summary>
         private static string GetRevitAddinsPluginPath()
         {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string[] revitVersions = { "2025", "2024", "2026", "2023" };
+            string[] revitVersions = GetRevitVersionsToSearch();
             foreach (var ver in revitVersions)
             {
                 string pluginDir = Path.Combine(appData, "Autodesk", "Revit", "Addins", ver, "revit_mcp_plugin");
@@ -290,7 +320,7 @@ namespace revit_mcp_plugin.Utils
         public static string TryGetRevitAddinsCommandsPath()
         {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string[] revitVersions = { "2025", "2024", "2026", "2023" };
+            string[] revitVersions = GetRevitVersionsToSearch();
             string fallback = null;
             foreach (var ver in revitVersions)
             {

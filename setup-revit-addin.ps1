@@ -1,53 +1,63 @@
-# Setup DeepBim-MCP add-in for Revit 2025
-# Chạy script này để copy add-in vào thư mục Revit Addins
+# Deploy DeepBim-MCP add-in for all Revit versions in RevitVersions.json
+# Copies each "AddIn YYYY Debug" output to %APPDATA%\Autodesk\Revit\Addins\YYYY
 
 $ErrorActionPreference = "Stop"
-$RevitAddinsPath = "$env:APPDATA\Autodesk\Revit\Addins\2025"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$AddInSource = Join-Path $ScriptDir "plugin\bin\AddIn 2025 Debug"
+$versionsFile = Join-Path $ScriptDir "RevitVersions.json"
 
-if (-not (Test-Path $AddInSource)) {
-    Write-Host "Build output not found at: $AddInSource" -ForegroundColor Red
-    Write-Host "Please build the solution first (Build > Build Solution in Visual Studio)" -ForegroundColor Yellow
+if (-not (Test-Path $versionsFile)) {
+    Write-Host "RevitVersions.json not found. Create it with revitVersions array (e.g. [2024, 2025, 2026])." -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Setting up DeepBim-MCP for Revit 2025..." -ForegroundColor Cyan
-Write-Host "Source: $AddInSource" -ForegroundColor Gray
-Write-Host "Target: $RevitAddinsPath" -ForegroundColor Gray
-
-# Create target directory
-New-Item -ItemType Directory -Path $RevitAddinsPath -Force | Out-Null
-
-# Copy .addin manifest
-$addinFile = Join-Path $AddInSource "revit-mcp-plugin.addin"
-if (Test-Path $addinFile) {
-    Copy-Item $addinFile -Destination $RevitAddinsPath -Force
-    Write-Host "  [OK] revit-mcp-plugin.addin" -ForegroundColor Green
-} else {
-    Write-Host "  [SKIP] revit-mcp-plugin.addin not found" -ForegroundColor Yellow
+$config = Get-Content $versionsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+$versionList = @($config.revitVersions) | ForEach-Object { [string]$_ }
+if ($versionList.Count -eq 0) {
+    Write-Host "revitVersions in RevitVersions.json is empty." -ForegroundColor Red
+    exit 1
 }
 
-# Copy revit_mcp_plugin folder (plugin DLLs + Commands)
-$pluginSource = Join-Path $AddInSource "revit_mcp_plugin"
-$pluginDest = Join-Path $RevitAddinsPath "revit_mcp_plugin"
+$Configuration = "Debug"
+Write-Host "Deploying DeepBim-MCP for Revit version(s): $($versionList -join ', ')" -ForegroundColor Cyan
 
-if (Test-Path $pluginSource) {
-    if (Test-Path $pluginDest) { Remove-Item $pluginDest -Recurse -Force }
-    Copy-Item $pluginSource -Destination $pluginDest -Recurse -Force
-    Write-Host "  [OK] revit_mcp_plugin\" -ForegroundColor Green
-    # Deploy env: plugin sẽ dùng thư mục AppData (không dùng build output)
-    $envDest = Join-Path $pluginDest "deepbim-mcp.env.json"
-    @{ mode = "deploy"; description = "Deploy: plugin uses this AppData folder. Set by setup-revit-addin.ps1." } | ConvertTo-Json | Set-Content -Path $envDest -Encoding UTF8
-    Write-Host "  [OK] deepbim-mcp.env.json (mode=deploy)" -ForegroundColor Green
-} else {
-    Write-Host "  [SKIP] revit_mcp_plugin folder not found" -ForegroundColor Yellow
+foreach ($ver in $versionList) {
+    $AddInSource = Join-Path $ScriptDir "plugin\bin\AddIn $ver $Configuration"
+    $RevitAddinsPath = "$env:APPDATA\Autodesk\Revit\Addins\$ver"
+
+    if (-not (Test-Path $AddInSource)) {
+        Write-Host "  [SKIP] Revit $ver - build output not found: $AddInSource" -ForegroundColor Yellow
+        continue
+    }
+
+    Write-Host ""
+    Write-Host "  Revit $ver" -ForegroundColor Green
+    Write-Host "    Source: $AddInSource" -ForegroundColor Gray
+    Write-Host "    Target: $RevitAddinsPath" -ForegroundColor Gray
+
+    New-Item -ItemType Directory -Path $RevitAddinsPath -Force | Out-Null
+
+    $addinFile = Join-Path $AddInSource "revit-mcp-plugin.addin"
+    if (Test-Path $addinFile) {
+        Copy-Item $addinFile -Destination $RevitAddinsPath -Force
+        Write-Host "    [OK] revit-mcp-plugin.addin" -ForegroundColor Green
+    } else {
+        Write-Host "    [SKIP] revit-mcp-plugin.addin not found" -ForegroundColor Yellow
+    }
+
+    $pluginSource = Join-Path $AddInSource "revit_mcp_plugin"
+    $pluginDest = Join-Path $RevitAddinsPath "revit_mcp_plugin"
+    if (Test-Path $pluginSource) {
+        if (Test-Path $pluginDest) { Remove-Item $pluginDest -Recurse -Force }
+        Copy-Item $pluginSource -Destination $pluginDest -Recurse -Force
+        Write-Host "    [OK] revit_mcp_plugin\" -ForegroundColor Green
+        $envDest = Join-Path $pluginDest "deepbim-mcp.env.json"
+        @{ mode = "deploy"; description = "Deploy: plugin uses this AppData folder. Set by setup-revit-addin.ps1." } | ConvertTo-Json | Set-Content -Path $envDest -Encoding UTF8
+        Write-Host "    [OK] deepbim-mcp.env.json (mode=deploy)" -ForegroundColor Green
+    } else {
+        Write-Host "    [SKIP] revit_mcp_plugin folder not found" -ForegroundColor Yellow
+    }
 }
 
 Write-Host ""
-Write-Host "Setup complete! Restart Revit to load DeepBim-MCP." -ForegroundColor Green
-Write-Host "Add-in will appear in Revit Add-Ins tab." -ForegroundColor Gray
-Write-Host ""
-Write-Host "If you get 'Method say_hello not found':" -ForegroundColor Yellow
-Write-Host "  1. Build the full solution first (so Commands + commandRegistry.json are updated)" -ForegroundColor Gray
-Write-Host "  2. Run this script again, then restart Revit and click MCP Switch > Start" -ForegroundColor Gray
+Write-Host "Deploy complete for: $($versionList -join ', '). Restart Revit to load DeepBim-MCP." -ForegroundColor Green
+Write-Host "If a version was skipped, build first: .\scripts\Build-RevitVersions.ps1" -ForegroundColor Gray
