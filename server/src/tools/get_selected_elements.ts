@@ -5,20 +5,27 @@ import { withRevitConnection } from "../utils/ConnectionManager.js";
 export function registerGetSelectedElementsTool(server: McpServer) {
   server.tool(
     "get_selected_elements",
-    "Get information about currently selected elements in Revit, including element ID, name, category, and family type.",
+    "Get elements currently selected in Revit. You can limit the number of returned elements.",
     {
-      limit: z.number().optional().describe("Maximum number of elements to return"),
+      limit: z
+        .number()
+        .optional()
+        .describe("Maximum number of elements to return"),
     },
-    async (args) => {
+    async (args, extra) => {
+      const params = {
+        limit: args.limit || 100,
+      };
+
       try {
         const response = await withRevitConnection(async (revitClient) => {
-          return await revitClient.sendCommand("get_selected_elements", args);
+          return await revitClient.sendCommand("get_selected_elements", params);
         });
 
         return {
           content: [
             {
-              type: "text" as const,
+              type: "text",
               text: JSON.stringify(response, null, 2),
             },
           ],
@@ -27,8 +34,10 @@ export function registerGetSelectedElementsTool(server: McpServer) {
         return {
           content: [
             {
-              type: "text" as const,
-              text: `Get selected elements failed: ${error instanceof Error ? error.message : String(error)}`,
+              type: "text",
+              text: `get selected elements failed: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           ],
         };

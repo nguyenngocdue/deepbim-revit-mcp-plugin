@@ -10,7 +10,7 @@ namespace revit_mcp_plugin.Core
     {
         public Result OnStartup(UIControlledApplication application)
         {
-            // Ghi nhận thư mục add-in ngay khi load (tránh Assembly.Location trống / temp khi mở Settings)
+            // Record add-in directory on load (avoids Assembly.Location empty/temp when opening Settings)
             try
             {
                 string loc = Assembly.GetExecutingAssembly().Location;

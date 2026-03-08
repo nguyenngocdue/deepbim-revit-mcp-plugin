@@ -16,7 +16,7 @@ namespace revit_mcp_plugin.Utils
             if (_pluginDirectory != null)
                 return _pluginDirectory;
 
-            // Method 0: env file — dev = dùng thư mục chứa DLL (build output), deploy = dùng AppData
+            // Method 0: env file — dev = use folder containing DLL (build output), deploy = use AppData
             string assemblyDir = GetAssemblyDirectory();
             if (!string.IsNullOrEmpty(assemblyDir))
             {
@@ -78,7 +78,7 @@ namespace revit_mcp_plugin.Utils
 
         private static string GetAssemblyDirectory()
         {
-            // Ưu tiên thư mục đã set lúc startup (Application.OnStartup) khi Location trống hoặc trỏ vào temp
+            // Prefer directory set at startup (Application.OnStartup) when Location is empty or points to temp
             if (!string.IsNullOrEmpty(_pluginDirectory) && Directory.Exists(_pluginDirectory))
                 return _pluginDirectory;
             try
@@ -160,7 +160,7 @@ namespace revit_mcp_plugin.Utils
         }
 
         /// <summary>
-        /// Returns Commands path based on assembly location (thư mục chứa DLL). Để Settings thử khi path chính không có command set.
+        /// Returns Commands path based on assembly location (folder containing DLL). Used by Settings when primary path has no command set.
         /// </summary>
         public static string GetAssemblyCommandsPath()
         {
@@ -219,7 +219,7 @@ namespace revit_mcp_plugin.Utils
 
         public static string GetCommandRegistryFilePath(bool createIfNotExists = true)
         {
-            // Dev: ưu tiên path từ build (bin) để commands load đúng khi chạy từ Add-in Manager
+            // Dev: prefer path from build (bin) so commands load correctly when running from Add-in Manager
             // string devPath = TryGetDevCommandsPathFromFile();
             // if (!string.IsNullOrEmpty(devPath))
             // {
@@ -294,7 +294,7 @@ namespace revit_mcp_plugin.Utils
         }
 
         /// <summary>
-        /// Dev: path ghi lúc build (bin\...\Commands) để Settings tìm command set khi chạy từ Add-in Manager.
+        /// Dev: path written at build (bin\...\Commands) so Settings can find command set when running from Add-in Manager.
         /// </summary>
         public static string TryGetDevCommandsPathFromFile()
         {

@@ -1,28 +1,33 @@
 {
   "name": "RevitMCPCommandSet",
-  "description": "Command set for DeepBim-MCP",
+  "description": "Basic command collection for Revit AI assistance",
   "developer": {
     "name": "DeepBim-MCP",
     "organization": "DeepBim"
   },
   "commands": [
-    {
-      "commandName": "say_hello",
-      "description": "Displays a greeting dialog in Revit (connection test)",
-      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll",
-      "enabled": true
-    },
-    {
-      "commandName": "get_current_view_info",
-      "description": "Get current active view information",
-      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll",
-      "enabled": true
-    },
-    {
-      "commandName": "get_selected_elements",
-      "description": "Get currently selected elements in Revit",
-      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll",
-      "enabled": true
-    }
+    { "commandName": "say_hello", "description": "Displays a greeting dialog", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "get_available_family_types", "description": "Get available family types", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "get_current_view_elements", "description": "Get current view elements", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "get_current_view_info", "description": "Get current view info", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "get_selected_elements", "description": "Get selected elements", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "create_point_based_element", "description": "Create point-based elements like furniture", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "create_line_based_element", "description": "Create line based element such as wall", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "create_surface_based_element", "description": "Create surface-based elements like floors", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "color_splash", "description": "Color elements by parameter value", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "tag_walls", "description": "Tag all the walls in the model", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "delete_element", "description": "Deletes elements using ElementId", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "ai_element_filter", "description": "AI element filter for querying elements by criteria", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "operate_element", "description": "Operate on elements (select, color, hide, isolate, etc)", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "export_room_data", "description": "Extract all rooms with detailed properties", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "get_material_quantities", "description": "Calculate material quantities and takeoffs", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "analyze_model_statistics", "description": "Analyze model complexity with element counts", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "create_grid", "description": "Create grid system with smart spacing", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "create_structural_framing_system", "description": "Create structural beam framing system", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "create_room", "description": "Create and place rooms at specified locations", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "tag_rooms", "description": "Create tags for all rooms in the current view", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "create_level", "description": "Create levels at specified elevations", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "send_code_to_revit", "description": "Execute dynamic C# code in Revit", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "create_dimensions", "description": "Create dimension annotations between elements or points", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true }
   ]
 }

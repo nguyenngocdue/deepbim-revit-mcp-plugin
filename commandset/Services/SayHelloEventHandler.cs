@@ -1,57 +1,35 @@
 using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models;
 using RevitMCPSDK.API.Interfaces;
-using System;
-using System.Threading;
 
-namespace RevitMCPCommandSet.Services;
-
-public class SayHelloEventHandler : IExternalEventHandler, IWaitableExternalEventHandler
+namespace RevitMCPCommandSet.Services
 {
-    private readonly ManualResetEvent _resetEvent = new ManualResetEvent(false);
-
-    public AIResult<string> Result { get; private set; }
-    public string UserName { get; set; } = "World";
-
-    public void SetParameters(string name)
+    public class SayHelloEventHandler : IExternalEventHandler, IWaitableExternalEventHandler
     {
-        UserName = string.IsNullOrEmpty(name) ? "World" : name;
-        _resetEvent.Reset();
-    }
+        private readonly ManualResetEvent _resetEvent = new ManualResetEvent(false);
 
-    public void Execute(UIApplication uiapp)
-    {
-        try
-        {
-            string greeting = $"Hello, {UserName}! DeepBim-MCP is working!";
-            TaskDialog.Show("DeepBim-MCP", greeting);
+        public string Message { get; set; } = "Hello MCP!";
 
-            Result = new AIResult<string>
-            {
-                Success = true,
-                Message = greeting,
-                Response = greeting
-            };
-        }
-        catch (Exception ex)
+        public bool WaitForCompletion(int timeoutMilliseconds = 10000)
         {
-            Result = new AIResult<string>
-            {
-                Success = false,
-                Message = $"Error: {ex.Message}"
-            };
-        }
-        finally
-        {
-            _resetEvent.Set();
-        }
-    }
-
-    public bool WaitForCompletion(int timeoutMilliseconds = 10000)
-    {
-        _resetEvent.Reset();
+            _resetEvent.Reset();
         return _resetEvent.WaitOne(timeoutMilliseconds);
-    }
+        }
 
-    public string GetName() => "SayHello";
+        public void Execute(UIApplication app)
+        {
+            try
+            {
+                TaskDialog.Show("Revit MCP", Message);
+            }
+            finally
+            {
+                _resetEvent.Set();
+            }
+        }
+
+        public string GetName()
+        {
+            return "Say Hello";
+        }
+    }
 }

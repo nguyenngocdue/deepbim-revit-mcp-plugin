@@ -27,7 +27,7 @@ namespace revit_mcp_plugin.UI
             Loaded += (s, e) =>
             {
                 RefreshStatus();
-                // Tự Start khi mở panel nếu chưa chạy — để tool Cursor/Claude kết nối được ngay, không cần bấm Start tay
+                // Auto-start when opening panel if not running — so Cursor/Claude tools can connect without clicking Start
                 if (!SocketService.Instance.IsRunning)
                 {
                     try

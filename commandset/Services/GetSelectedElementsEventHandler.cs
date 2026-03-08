@@ -1,84 +1,78 @@
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models;
+using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace RevitMCPCommandSet.Services;
-
-public class GetSelectedElementsEventHandler : IExternalEventHandler, IWaitableExternalEventHandler
+namespace RevitMCPCommandSet.Services
 {
-    private readonly ManualResetEvent _resetEvent = new ManualResetEvent(false);
-
-    public AIResult<List<ElementInfo>> Result { get; private set; }
-    public int? Limit { get; set; }
-
-    public void Execute(UIApplication uiapp)
+    public class GetSelectedElementsEventHandler : IExternalEventHandler, IWaitableExternalEventHandler
     {
-        try
+        // 执行结果
+        public List<Models.Common.ElementInfo> ResultElements { get; private set; }
+
+        // 状态同步对象
+        public bool TaskCompleted { get; private set; }
+        private readonly ManualResetEvent _resetEvent = new ManualResetEvent(false);
+
+        // 限制返回的元素数量
+        public int? Limit { get; set; }
+
+        // 实现IWaitableExternalEventHandler接口
+        public bool WaitForCompletion(int timeoutMilliseconds = 10000)
         {
-            var uiDoc = uiapp.ActiveUIDocument;
-            var doc = uiDoc.Document;
-            var selectedIds = uiDoc.Selection.GetElementIds();
+            _resetEvent.Reset();
+            return _resetEvent.WaitOne(timeoutMilliseconds);
+        }
 
-            var elements = new List<ElementInfo>();
-
-            IEnumerable<ElementId> ids = selectedIds.AsEnumerable();
-            if (Limit.HasValue && Limit.Value > 0)
-                ids = ids.Take(Limit.Value);
-
-            foreach (var id in ids)
+        public void Execute(UIApplication app)
+        {
+            try
             {
-                var element = doc.GetElement(id);
-                if (element == null) continue;
+                var uiDoc = app.ActiveUIDocument;
+                var doc = uiDoc.Document;
 
-                var info = new ElementInfo
-                {
-                    Id = (int)id.Value,
-                    UniqueId = element.UniqueId,
-                    Name = element.Name,
-                    Category = element.Category?.Name ?? "Unknown",
-                };
+                // 获取当前选中的元素
+                var selectedIds = uiDoc.Selection.GetElementIds();
+                var selectedElements = selectedIds.Select(id => doc.GetElement(id)).ToList();
 
-                if (element is FamilyInstance fi)
+                // 应用数量限制
+                if (Limit.HasValue && Limit.Value > 0)
                 {
-                    info.FamilyName = fi.Symbol?.FamilyName;
-                    info.TypeName = fi.Symbol?.Name;
+                    selectedElements = selectedElements.Take(Limit.Value).ToList();
                 }
 
-                elements.Add(info);
+                // 转换为ElementInfo列表
+                ResultElements = selectedElements.Select(element => new ElementInfo
+                {
+#if REVIT2024_OR_GREATER
+                    Id = element.Id.Value,
+#else
+                    Id = element.Id.IntegerValue,
+#endif
+                    UniqueId = element.UniqueId,
+                    Name = element.Name,
+                    Category = element.Category?.Name
+                }).ToList();
             }
+            catch (Exception ex)
+            {
+                TaskDialog.Show("Error", "获取选中元素失败: " + ex.Message);
+                ResultElements = new List<Models.Common.ElementInfo>();
+            }
+            finally
+            {
+                TaskCompleted = true;
+                _resetEvent.Set();
+            }
+        }
 
-            Result = new AIResult<List<ElementInfo>>
-            {
-                Success = true,
-                Message = $"Found {elements.Count} selected element(s).",
-                Response = elements
-            };
-        }
-        catch (Exception ex)
+        public string GetName()
         {
-            Result = new AIResult<List<ElementInfo>>
-            {
-                Success = false,
-                Message = $"Error: {ex.Message}",
-                Response = new List<ElementInfo>()
-            };
-        }
-        finally
-        {
-            _resetEvent.Set();
+            return "获取选中元素";
         }
     }
-
-    public bool WaitForCompletion(int timeoutMilliseconds = 10000)
-    {
-        _resetEvent.Reset();
-        return _resetEvent.WaitOne(timeoutMilliseconds);
-    }
-
-    public string GetName() => "GetSelectedElements";
 }
