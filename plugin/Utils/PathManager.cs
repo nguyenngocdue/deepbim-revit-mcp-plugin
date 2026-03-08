@@ -219,22 +219,35 @@ namespace revit_mcp_plugin.Utils
 
         public static string GetCommandRegistryFilePath(bool createIfNotExists = true)
         {
+            // Dev: ưu tiên path từ build (bin) để commands load đúng khi chạy từ Add-in Manager
+            // string devPath = TryGetDevCommandsPathFromFile();
+            // if (!string.IsNullOrEmpty(devPath))
+            // {
+            //     string reg = Path.Combine(devPath, "commandRegistry.json");
+            //     if (File.Exists(reg) && !IsRegistryEmpty(reg))
+            //     {
+            //         string pluginDir = Path.GetDirectoryName(devPath);
+            //         if (Directory.Exists(pluginDir))
+            //             _pluginDirectory = pluginDir;
+            //         return reg;
+            //     }
+            // }
+
             string commandsDir = GetCommandsDirectoryPath();
             string registryPath = Path.Combine(commandsDir, "commandRegistry.json");
 
-            // If primary path has no valid registry, try Revit Addins path (common when Assembly.Location is empty on .NET 8)
             if (!File.Exists(registryPath) || IsRegistryEmpty(registryPath))
             {
                 string fallbackPath = TryGetRevitAddinsCommandsPath();
                 if (!string.IsNullOrEmpty(fallbackPath))
                 {
-                    registryPath = Path.Combine(fallbackPath, "commandRegistry.json");
-                    if (File.Exists(registryPath))
+                    string reg = Path.Combine(fallbackPath, "commandRegistry.json");
+                    if (File.Exists(reg) && !IsRegistryEmpty(reg))
                     {
                         string pluginDir = Path.GetDirectoryName(fallbackPath);
                         if (Directory.Exists(pluginDir))
                             _pluginDirectory = pluginDir;
-                        return registryPath;
+                        return reg;
                     }
                 }
             }
