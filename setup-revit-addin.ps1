@@ -43,3 +43,7 @@ if (Test-Path $pluginSource) {
 Write-Host ""
 Write-Host "Setup complete! Restart Revit to load DeepBim-MCP." -ForegroundColor Green
 Write-Host "Add-in will appear in Revit Add-Ins tab." -ForegroundColor Gray
+Write-Host ""
+Write-Host "If you get 'Method say_hello not found':" -ForegroundColor Yellow
+Write-Host "  1. Build the full solution first (so Commands + commandRegistry.json are updated)" -ForegroundColor Gray
+Write-Host "  2. Run this script again, then restart Revit and click MCP Switch > Start" -ForegroundColor Gray

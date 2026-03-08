@@ -23,17 +23,34 @@ namespace revit_mcp_plugin.UI
             PluginDirText.Text = PathManager.GetPluginDirectoryPath();
             AppendLog($"Plugin: {PathManager.GetPluginDirectoryPath()}");
             AppendLog($"Commands: {PathManager.GetCommandsDirectoryPath()}");
-            RefreshStatus();
 
-            // Auto-start when window opens if server is not running (easier for Claude connection)
-            if (!SocketService.Instance.IsRunning)
+            Loaded += (s, e) =>
             {
-                Loaded += (s, e) =>
+                RefreshStatus();
+                // Tự Start khi mở panel nếu chưa chạy — để tool Cursor/Claude kết nối được ngay, không cần bấm Start tay
+                if (!SocketService.Instance.IsRunning)
                 {
-                    if (!SocketService.Instance.IsRunning)
-                        StartButton_Click(StartButton, e);
-                };
-            }
+                    try
+                    {
+                        var service = SocketService.Instance;
+                        service.Initialize(_uiApp);
+                        service.Start();
+                        if (service.IsRunning)
+                        {
+                            AppendLog($">>> Auto-started on port {service.Port} (tool co the ket noi ngay) <<<");
+                            RefreshStatus();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendLog($"[Auto-start] {ex.Message}");
+                        RefreshStatus();
+                    }
+                }
+            };
+            Activated += (s, e) => RefreshStatus();
+
+            RefreshStatus();
         }
 
         private void RefreshStatus()
@@ -41,7 +58,8 @@ namespace revit_mcp_plugin.UI
             bool running = SocketService.Instance.IsRunning;
             int port = SocketService.Instance.Port;
 
-            PortText.Text = running ? port.ToString() : "—";
+            int lastPort = SocketService.GetLastUsedPort();
+            PortText.Text = running ? port.ToString() : (lastPort > 0 ? lastPort.ToString() : "—");
 
             if (running)
             {
@@ -75,7 +93,7 @@ namespace revit_mcp_plugin.UI
                 service.Initialize(_uiApp);
                 AppendLog("Initialized.");
 
-                AppendLog("Finding available port (8080-8099)...");
+                AppendLog("Starting server (8080 or next free port)...");
                 service.Start();
 
                 if (service.IsRunning)

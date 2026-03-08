@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -48,6 +49,9 @@ namespace revit_mcp_plugin.Core
 
         private const int DEFAULT_PORT = 8080;
         private const int MAX_PORT = 8099;
+        private static readonly string PortFilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "DeepBim-MCP", "mcp-port.txt");
 
         public void Initialize(UIApplication uiApp)
         {
@@ -74,7 +78,8 @@ namespace revit_mcp_plugin.Core
         {
             if (_isRunning) return;
 
-            for (int port = DEFAULT_PORT; port <= MAX_PORT; port++)
+            int lastPort = TryReadLastPort();
+            foreach (int port in GetPortOrder(lastPort))
             {
                 try
                 {
@@ -89,6 +94,7 @@ namespace revit_mcp_plugin.Core
                     };
                     _listenerThread.Start();
 
+                    SaveLastPort(port);
                     _logger.Info($"TCP server listening on port {_port}");
                     return;
                 }
@@ -99,7 +105,52 @@ namespace revit_mcp_plugin.Core
                 }
             }
 
-            throw new Exception($"No available port in range {DEFAULT_PORT}-{MAX_PORT}.");
+            throw new Exception($"No available port in range {DEFAULT_PORT}-{MAX_PORT}. All are in use.");
+        }
+
+        /// <summary>Try last used port first, then 8080, 8081, ... 8099.</summary>
+        private static IEnumerable<int> GetPortOrder(int lastPort)
+        {
+            if (lastPort >= DEFAULT_PORT && lastPort <= MAX_PORT)
+                yield return lastPort;
+            for (int p = DEFAULT_PORT; p <= MAX_PORT; p++)
+            {
+                if (p == lastPort) continue;
+                yield return p;
+            }
+        }
+
+        /// <summary>Returns the last port used (saved when server was started). 0 if none saved.</summary>
+        public static int GetLastUsedPort()
+        {
+            return TryReadLastPort();
+        }
+
+        private static int TryReadLastPort()
+        {
+            try
+            {
+                if (File.Exists(PortFilePath))
+                {
+                    string s = File.ReadAllText(PortFilePath).Trim();
+                    if (int.TryParse(s, out int p) && p >= DEFAULT_PORT && p <= MAX_PORT)
+                        return p;
+                }
+            }
+            catch { }
+            return 0;
+        }
+
+        private static void SaveLastPort(int port)
+        {
+            try
+            {
+                string dir = Path.GetDirectoryName(PortFilePath);
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                File.WriteAllText(PortFilePath, port.ToString());
+            }
+            catch { }
         }
 
         public void Stop()

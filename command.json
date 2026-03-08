@@ -9,17 +9,20 @@
     {
       "commandName": "say_hello",
       "description": "Displays a greeting dialog in Revit (connection test)",
-      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll"
+      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll",
+      "enabled": true
     },
     {
-      "commandName": "get_view_info",
+      "commandName": "get_current_view_info",
       "description": "Get current active view information",
-      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll"
+      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll",
+      "enabled": true
     },
     {
       "commandName": "get_selected_elements",
       "description": "Get currently selected elements in Revit",
-      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll"
+      "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll",
+      "enabled": true
     }
   ]
 }

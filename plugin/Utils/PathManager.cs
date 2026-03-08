@@ -14,19 +14,27 @@ namespace revit_mcp_plugin.Utils
             if (_pluginDirectory != null)
                 return _pluginDirectory;
 
-            // Method 1: Assembly.Location
+            // Method 1: Revit Addins path (where the add-in is actually deployed - always writable)
+            string addinsBase = GetRevitAddinsPluginPath();
+            if (!string.IsNullOrEmpty(addinsBase))
+            {
+                _pluginDirectory = addinsBase;
+                return _pluginDirectory;
+            }
+
+            // Method 2: Assembly.Location (only if writable - avoid Program Files / dotnet runtime)
             string location = typeof(PathManager).Assembly.Location;
             if (!string.IsNullOrEmpty(location))
             {
                 string dir = Path.GetDirectoryName(location);
-                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir) && IsWritablePluginPath(dir))
                 {
                     _pluginDirectory = dir;
                     return _pluginDirectory;
                 }
             }
 
-            // Method 2: Search all loaded assemblies for our DLL
+            // Method 3: Search loaded assemblies for RevitMCPPlugin (only if writable)
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
@@ -34,7 +42,7 @@ namespace revit_mcp_plugin.Utils
                     if (asm.GetName().Name == "RevitMCPPlugin" && !string.IsNullOrEmpty(asm.Location))
                     {
                         string dir = Path.GetDirectoryName(asm.Location);
-                        if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                        if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir) && IsWritablePluginPath(dir))
                         {
                             _pluginDirectory = dir;
                             return _pluginDirectory;
@@ -44,7 +52,7 @@ namespace revit_mcp_plugin.Utils
                 catch { }
             }
 
-            // Method 3: Fallback to %APPDATA%\DeepBim-MCP
+            // Method 4: Fallback to %APPDATA%\DeepBim-MCP (guaranteed writable)
             _pluginDirectory = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "DeepBim-MCP");
@@ -52,6 +60,35 @@ namespace revit_mcp_plugin.Utils
                 Directory.CreateDirectory(_pluginDirectory);
 
             return _pluginDirectory;
+        }
+
+        /// <summary>
+        /// Returns true if the path is a writable plugin root (not under Program Files or dotnet runtime).
+        /// </summary>
+        private static bool IsWritablePluginPath(string dir)
+        {
+            if (string.IsNullOrEmpty(dir)) return false;
+            string full = Path.GetFullPath(dir).ToUpperInvariant();
+            if (full.Contains("PROGRAM FILES")) return false;
+            if (full.Contains("PROGRAM FILES (X86)")) return false;
+            if (full.Contains("DOTNET\\SHARED\\")) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the add-in folder in Revit Addins (e.g. %APPDATA%\Autodesk\Revit\Addins\2025\revit_mcp_plugin) if it exists.
+        /// </summary>
+        private static string GetRevitAddinsPluginPath()
+        {
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string[] revitVersions = { "2025", "2024", "2026", "2023" };
+            foreach (var ver in revitVersions)
+            {
+                string pluginDir = Path.Combine(appData, "Autodesk", "Revit", "Addins", ver, "revit_mcp_plugin");
+                if (Directory.Exists(pluginDir))
+                    return pluginDir;
+            }
+            return null;
         }
 
         /// <summary>
@@ -70,10 +107,24 @@ namespace revit_mcp_plugin.Utils
 
         public static string GetCommandsDirectoryPath()
         {
-            string dir = Path.Combine(GetPluginDirectoryPath(), "Commands");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-            return dir;
+            string baseDir = GetPluginDirectoryPath();
+            string dir = Path.Combine(baseDir, "Commands");
+            try
+            {
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                return dir;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Fallback to writable AppData if plugin dir is not writable (e.g. Program Files)
+                dir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "DeepBim-MCP", "Commands");
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                return dir;
+            }
         }
 
         public static string GetLogsDirectoryPath()

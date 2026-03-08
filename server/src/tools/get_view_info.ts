@@ -9,7 +9,7 @@ export function registerGetViewInfoTool(server: McpServer) {
     async () => {
       try {
         const response = await withRevitConnection(async (revitClient) => {
-          return await revitClient.sendCommand("get_view_info", {});
+          return await revitClient.sendCommand("get_current_view_info", {});
         });
 
         return {
