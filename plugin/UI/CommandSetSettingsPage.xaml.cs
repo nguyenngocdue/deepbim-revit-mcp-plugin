@@ -36,138 +36,123 @@ namespace revit_mcp_plugin.UI
             try
             {
                 commandSets.Clear();
-                string commandsDirectory = PathManager.GetCommandsDirectoryPath();
-                string registryFilePath = PathManager.GetCommandRegistryFilePath();
+                string[] candidates = PathManager.GetCandidateCommandsPaths();
 
-                // If primary path has no command set folders, try Revit Addins path (e.g. when Assembly.Location is empty)
-                if (!Directory.Exists(commandsDirectory) || !Directory.GetDirectories(commandsDirectory).Any(d => !Path.GetFileName(d).StartsWith(".")))
+                foreach (string commandsDirectory in candidates)
                 {
-                    string fallback = PathManager.TryGetRevitAddinsCommandsPath();
-                    if (!string.IsNullOrEmpty(fallback))
-                    {
-                        commandsDirectory = fallback;
-                        registryFilePath = Path.Combine(fallback, "commandRegistry.json");
-                        PathManager.SetPluginDirectory(Path.GetDirectoryName(fallback));
-                    }
-                }
-
-                var availableCommandSets = new Dictionary<string, CommandSetInfo>();
-                var availableCommandNames = new HashSet<string>();
-
-                string[] commandSetDirectories = Directory.GetDirectories(commandsDirectory);
-                foreach (var directory in commandSetDirectories)
-                {
-                    if (Path.GetFileName(directory).StartsWith("."))
+                    if (string.IsNullOrEmpty(commandsDirectory) || !Directory.Exists(commandsDirectory))
                         continue;
 
-                    string commandJsonPath = Path.Combine(directory, "command.json");
-                    if (!File.Exists(commandJsonPath))
-                        continue;
+                    var availableCommandSets = new Dictionary<string, CommandSetInfo>();
+                    var availableCommandNames = new HashSet<string>();
+                    string registryFilePath = Path.Combine(commandsDirectory, "commandRegistry.json");
 
-                    string commandJson = File.ReadAllText(commandJsonPath);
-                    var commandSetData = JsonConvert.DeserializeObject<CommandJsonModel>(commandJson);
-                    if (commandSetData == null)
-                        continue;
-
-                    var newCommandSet = new CommandSetInfo
+                    foreach (var directory in Directory.GetDirectories(commandsDirectory))
                     {
-                        Name = commandSetData.Name,
-                        Description = commandSetData.Description,
-                        Commands = new List<CommandConfig>()
-                    };
+                        if (Path.GetFileName(directory).StartsWith("."))
+                            continue;
 
-                    var versionDirectories = Directory.GetDirectories(directory)
-                        .Select(Path.GetFileName)
-                        .Where(name => int.TryParse(name, out _))
-                        .ToList();
+                        string commandJsonPath = Path.Combine(directory, "command.json");
+                        if (!File.Exists(commandJsonPath))
+                            continue;
 
-                    foreach (var command in commandSetData.Commands)
-                    {
-                        string dllBasePath = null;
-                        var supportedVersions = new List<string>();
+                        string commandJson = File.ReadAllText(commandJsonPath);
+                        var commandSetData = JsonConvert.DeserializeObject<CommandJsonModel>(commandJson);
+                        if (commandSetData == null)
+                            continue;
 
-                        foreach (var version in versionDirectories)
+                        var newCommandSet = new CommandSetInfo
                         {
-                            string versionDir = Path.Combine(directory, version);
-                            if (!string.IsNullOrEmpty(command.AssemblyPath))
+                            Name = commandSetData.Name,
+                            Description = commandSetData.Description,
+                            Commands = new List<CommandConfig>()
+                        };
+
+                        var versionDirectories = Directory.GetDirectories(directory)
+                            .Select(Path.GetFileName)
+                            .Where(name => int.TryParse(name, out _))
+                            .ToList();
+
+                        foreach (var command in commandSetData.Commands)
+                        {
+                            string dllBasePath = null;
+                            var supportedVersions = new List<string>();
+
+                            foreach (var version in versionDirectories)
                             {
-                                // assemblyPath may be "RevitMCPCommandSet.dll" or "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll"
-                                string dllFileName = Path.GetFileName(command.AssemblyPath.Replace("{VERSION}", version));
-                                string versionDllPath = Path.Combine(versionDir, dllFileName);
-                                if (File.Exists(versionDllPath))
+                                string versionDir = Path.Combine(directory, version);
+                                if (!string.IsNullOrEmpty(command.AssemblyPath))
                                 {
-                                    dllBasePath ??= Path.Combine(commandSetData.Name, "{VERSION}", dllFileName);
-                                    supportedVersions.Add(version);
+                                    string dllFileName = Path.GetFileName(command.AssemblyPath.Replace("{VERSION}", version));
+                                    if (File.Exists(Path.Combine(versionDir, dllFileName)))
+                                    {
+                                        dllBasePath ??= Path.Combine(commandSetData.Name, "{VERSION}", dllFileName);
+                                        supportedVersions.Add(version);
+                                    }
+                                }
+                                else
+                                {
+                                    var dlls = Directory.GetFiles(versionDir, "*.dll");
+                                    if (dlls.Length > 0)
+                                    {
+                                        dllBasePath ??= Path.Combine(commandSetData.Name, "{VERSION}", Path.GetFileName(dlls[0]));
+                                        supportedVersions.Add(version);
+                                    }
                                 }
                             }
-                            else
+
+                            if (supportedVersions.Count > 0 && dllBasePath != null)
                             {
-                                var dlls = Directory.GetFiles(versionDir, "*.dll");
-                                if (dlls.Length > 0)
+                                newCommandSet.Commands.Add(new CommandConfig
                                 {
-                                    dllBasePath ??= Path.Combine(commandSetData.Name, "{VERSION}", Path.GetFileName(dlls[0]));
-                                    supportedVersions.Add(version);
-                                }
-                            }
-                        }
-
-                        if (supportedVersions.Count > 0 && dllBasePath != null)
-                        {
-                            newCommandSet.Commands.Add(new CommandConfig
-                            {
-                                CommandName = command.CommandName,
-                                Description = command.Description,
-                                AssemblyPath = dllBasePath,
-                                Enabled = false,
-                                SupportedRevitVersions = supportedVersions.ToArray()
-                            });
-                            availableCommandNames.Add(command.CommandName);
-                        }
-                    }
-
-                    if (newCommandSet.Commands.Any())
-                    {
-                        availableCommandSets[commandSetData.Name] = newCommandSet;
-                    }
-                }
-
-                if (File.Exists(registryFilePath))
-                {
-                    string registryJson = File.ReadAllText(registryFilePath);
-                    var registry = JsonConvert.DeserializeObject<CommandRegistryModel>(registryJson);
-                    if (registry?.Commands != null)
-                    {
-                        var validCommands = new List<CommandConfig>();
-                        foreach (var item in registry.Commands)
-                        {
-                            if (availableCommandNames.Contains(item.CommandName))
-                            {
-                                validCommands.Add(item);
-                                foreach (var cs in availableCommandSets.Values)
-                                {
-                                    var cmd = cs.Commands.FirstOrDefault(c => c.CommandName == item.CommandName);
-                                    if (cmd != null) cmd.Enabled = item.Enabled;
-                                }
+                                    CommandName = command.CommandName,
+                                    Description = command.Description,
+                                    AssemblyPath = dllBasePath,
+                                    Enabled = false,
+                                    SupportedRevitVersions = supportedVersions.ToArray()
+                                });
+                                availableCommandNames.Add(command.CommandName);
                             }
                         }
 
-                        if (validCommands.Count != registry.Commands.Count)
-                        {
-                            registry.Commands = validCommands;
-                            File.WriteAllText(registryFilePath,
-                                JsonConvert.SerializeObject(registry, Formatting.Indented));
-                        }
+                        if (newCommandSet.Commands.Any())
+                            availableCommandSets[commandSetData.Name] = newCommandSet;
                     }
-                }
 
-                foreach (var cs in availableCommandSets.Values)
-                    commandSets.Add(cs);
+                    if (availableCommandSets.Count == 0)
+                        continue;
+
+                    if (File.Exists(registryFilePath))
+                    {
+                        try
+                        {
+                            var registry = JsonConvert.DeserializeObject<CommandRegistryModel>(File.ReadAllText(registryFilePath));
+                            if (registry?.Commands != null)
+                                foreach (var item in registry.Commands)
+                                    if (availableCommandNames.Contains(item.CommandName))
+                                        foreach (var cs in availableCommandSets.Values)
+                                        {
+                                            var cmd = cs.Commands.FirstOrDefault(c => c.CommandName == item.CommandName);
+                                            if (cmd != null) cmd.Enabled = item.Enabled;
+                                        }
+                        }
+                        catch { }
+                    }
+
+                    foreach (var cs in availableCommandSets.Values)
+                        commandSets.Add(cs);
+
+                    PathManager.SetPluginDirectory(Path.GetDirectoryName(commandsDirectory));
+                    break;
+                }
 
                 if (commandSets.Count == 0)
                 {
-                    MessageBox.Show(
-                        "No command sets found.\nCheck the Commands folder for valid command sets.",
-                        "No Command Sets", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string msg = "No command sets found.\n\n";
+                    msg += "• Dev: Build full solution (Plugin + RevitMCPCommandSet), then load add-in from Add-in Manager → plugin\\bin\\AddIn 2025 Debug.\n";
+                    msg += "• Deploy: Run setup-revit-addin.ps1 to copy to AppData.\n\n";
+                    msg += "Check: Commands\\RevitMCPCommandSet\\command.json and Commands\\RevitMCPCommandSet\\2025\\RevitMCPCommandSet.dll.";
+                    MessageBox.Show(msg, "No Command Sets", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)

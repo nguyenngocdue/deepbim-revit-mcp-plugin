@@ -22,8 +22,20 @@
         <PackageReference Include="RevitMCPSDK" Version="2025.*" />
     </ItemGroup>
 
-    <!-- Post-build: copy CommandSet DLLs into plugin's AddIn layout + generate registry -->
-    <Target Name="DeployCommandSet" AfterTargets="Build">
+    <!-- Đọc build-mode.txt: Dev = chỉ copy vào bin; Deploy = copy thêm vào AppData -->
+    <Target Name="ReadBuildMode">
+        <ReadLinesFromFile File="$(ProjectDir)..\build-mode.txt" Condition="Exists('$(ProjectDir)..\build-mode.txt')">
+            <Output TaskParameter="Lines" ItemName="_BuildModeLines" />
+        </ReadLinesFromFile>
+        <PropertyGroup>
+            <BuildMode>@(_BuildModeLines)</BuildMode>
+            <_CopyToAppData>false</_CopyToAppData>
+            <_CopyToAppData Condition="'$(BuildMode)'=='Deploy'">true</_CopyToAppData>
+        </PropertyGroup>
+    </Target>
+
+    <!-- Post-build: copy CommandSet vào bin; nếu mode=Deploy thì copy thêm vào AppData -->
+    <Target Name="DeployCommandSet" AfterTargets="Build" DependsOnTargets="ReadBuildMode">
         <PropertyGroup>
             <PluginAddInRoot>$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit_mcp_plugin\</PluginAddInRoot>
             <CommandSetPluginDir>$(PluginAddInRoot)Commands\RevitMCPCommandSet\</CommandSetPluginDir>
@@ -35,23 +47,20 @@
             <CommandJsonFile Include="$(ProjectDir)..\command.json" />
         </ItemGroup>
 
-        <!-- Copy DLLs and command.json -->
+        <!-- Luôn copy vào bin\ (Dev + Deploy); thay {VERSION} bằng 2025 trong command.json / registry -->
         <MakeDir Directories="$(CommandSetPluginDir)2025" />
-        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(CommandSetPluginDir)2025\" />
-        <Copy SourceFiles="@(CommandJsonFile)" DestinationFolder="$(CommandSetPluginDir)" />
-
-        <!-- Plugin expects commandRegistry.json at Commands\ - copy from command.json (single source of truth) -->
         <MakeDir Directories="$(PluginAddInRoot)Commands" />
-        <Copy SourceFiles="@(CommandJsonFile)" DestinationFiles="$(RegistryFile)" />
+        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(CommandSetPluginDir)2025\" />
+        <Exec Command="powershell -NoProfile -Command &quot;$c = [System.IO.File]::ReadAllText('$(ProjectDir)..\command.json'); $c = $c -replace '\{VERSION\}', '2025'; [System.IO.File]::WriteAllText('$(CommandSetPluginDir)command.json', $c, [System.Text.UTF8Encoding]::new($false)); [System.IO.File]::WriteAllText('$(RegistryFile)', $c, [System.Text.UTF8Encoding]::new($false))&quot;" Condition="Exists('$(ProjectDir)..\command.json')" />
 
-        <!-- Deploy to Revit Addins folder for automatic loading (Debug only) -->
+        <!-- Chỉ khi mode=Deploy: copy vào AppData -->
         <PropertyGroup>
             <RevitAddinsRoot>$(AppData)\Autodesk\Revit\Addins\2025\</RevitAddinsRoot>
         </PropertyGroup>
-        <Copy SourceFiles="$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit-mcp-plugin.addin" DestinationFolder="$(RevitAddinsRoot)" Condition="$(Configuration.Contains('Debug')) And Exists('$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit-mcp-plugin.addin')" />
+        <Copy SourceFiles="$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit-mcp-plugin.addin" DestinationFolder="$(RevitAddinsRoot)" Condition="'$(_CopyToAppData)'=='true' And Exists('$(ProjectDir)..\plugin\bin\AddIn 2025 $(Configuration)\revit-mcp-plugin.addin')" />
         <ItemGroup>
             <AddInFiles Include="$(PluginAddInRoot)**\*" />
         </ItemGroup>
-        <Copy SourceFiles="@(AddInFiles)" DestinationFiles="@(AddInFiles->'$(RevitAddinsRoot)revit_mcp_plugin\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="$(Configuration.Contains('Debug'))" />
+        <Copy SourceFiles="@(AddInFiles)" DestinationFiles="@(AddInFiles->'$(RevitAddinsRoot)revit_mcp_plugin\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="'$(_CopyToAppData)'=='true'" />
     </Target>
 </Project>

@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Reflection;
 using Autodesk.Revit.UI;
+using revit_mcp_plugin.Utils;
 
 namespace revit_mcp_plugin.Core
 {
@@ -8,6 +10,19 @@ namespace revit_mcp_plugin.Core
     {
         public Result OnStartup(UIControlledApplication application)
         {
+            // Ghi nhận thư mục add-in ngay khi load (tránh Assembly.Location trống / temp khi mở Settings)
+            try
+            {
+                string loc = Assembly.GetExecutingAssembly().Location;
+                if (!string.IsNullOrEmpty(loc))
+                {
+                    string dir = Path.GetDirectoryName(loc);
+                    if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                        PathManager.SetPluginDirectory(dir);
+                }
+            }
+            catch { }
+
             RibbonPanel mcpPanel = application.CreateRibbonPanel("DeepBim-MCP");
 
             PushButtonData toggleButton = new PushButtonData(

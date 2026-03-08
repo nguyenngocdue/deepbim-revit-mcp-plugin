@@ -9,12 +9,26 @@ namespace revit_mcp_plugin.Utils
     {
         private static string _pluginDirectory;
 
+        private const string EnvFileName = "deepbim-mcp.env.json";
+
         public static string GetPluginDirectoryPath()
         {
             if (_pluginDirectory != null)
                 return _pluginDirectory;
 
-            // Method 1: Revit Addins path (where the add-in is actually deployed - always writable)
+            // Method 0: env file — dev = dùng thư mục chứa DLL (build output), deploy = dùng AppData
+            string assemblyDir = GetAssemblyDirectory();
+            if (!string.IsNullOrEmpty(assemblyDir))
+            {
+                string mode = TryReadEnvMode(assemblyDir);
+                if (string.Equals(mode, "dev", StringComparison.OrdinalIgnoreCase) && IsWritablePluginPath(assemblyDir))
+                {
+                    _pluginDirectory = assemblyDir;
+                    return _pluginDirectory;
+                }
+            }
+
+            // Method 1: Deploy — Revit Addins path (AppData)
             string addinsBase = GetRevitAddinsPluginPath();
             if (!string.IsNullOrEmpty(addinsBase))
             {
@@ -62,6 +76,60 @@ namespace revit_mcp_plugin.Utils
             return _pluginDirectory;
         }
 
+        private static string GetAssemblyDirectory()
+        {
+            // Ưu tiên thư mục đã set lúc startup (Application.OnStartup) khi Location trống hoặc trỏ vào temp
+            if (!string.IsNullOrEmpty(_pluginDirectory) && Directory.Exists(_pluginDirectory))
+                return _pluginDirectory;
+            try
+            {
+                string loc = typeof(PathManager).Assembly.Location;
+                if (!string.IsNullOrEmpty(loc))
+                {
+                    string dir = Path.GetDirectoryName(loc);
+                    if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                    {
+                        string full = Path.GetFullPath(dir).ToUpperInvariant();
+                        if (!full.Contains("\\TEMP\\") && !full.Contains("\\APPDATA\\LOCAL\\TEMP\\"))
+                            return dir;
+                    }
+                }
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    try
+                    {
+                        if (asm.GetName().Name == "RevitMCPPlugin" && !string.IsNullOrEmpty(asm.Location))
+                        {
+                            string dir = Path.GetDirectoryName(asm.Location);
+                            if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                            {
+                                string full = Path.GetFullPath(dir).ToUpperInvariant();
+                                if (!full.Contains("\\TEMP\\") && !full.Contains("\\APPDATA\\LOCAL\\TEMP\\"))
+                                    return dir;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        private static string TryReadEnvMode(string pluginDir)
+        {
+            try
+            {
+                string path = Path.Combine(pluginDir, EnvFileName);
+                if (!File.Exists(path)) return null;
+                string json = File.ReadAllText(path);
+                var obj = JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(json);
+                return obj?["mode"]?.ToString();
+            }
+            catch { }
+            return null;
+        }
+
         /// <summary>
         /// Returns true if the path is a writable plugin root (not under Program Files or dotnet runtime).
         /// </summary>
@@ -89,6 +157,17 @@ namespace revit_mcp_plugin.Utils
                     return pluginDir;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Returns Commands path based on assembly location (thư mục chứa DLL). Để Settings thử khi path chính không có command set.
+        /// </summary>
+        public static string GetAssemblyCommandsPath()
+        {
+            string assemblyDir = GetAssemblyDirectory();
+            if (string.IsNullOrEmpty(assemblyDir)) return null;
+            string commandsPath = Path.Combine(assemblyDir, "Commands");
+            return Directory.Exists(commandsPath) ? commandsPath : null;
         }
 
         /// <summary>
@@ -182,19 +261,60 @@ namespace revit_mcp_plugin.Utils
 
         /// <summary>
         /// Tries to find Commands folder in Revit Addins path (used when primary path is empty/wrong).
+        /// Prefers path that has non-empty registry; otherwise returns any existing Commands dir for discovery.
         /// </summary>
         public static string TryGetRevitAddinsCommandsPath()
         {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string[] revitVersions = { "2025", "2024", "2026", "2023" };
+            string fallback = null;
             foreach (var ver in revitVersions)
             {
                 string commandsDir = Path.Combine(appData, "Autodesk", "Revit", "Addins", ver, "revit_mcp_plugin", "Commands");
+                if (!Directory.Exists(commandsDir)) continue;
                 string registryFile = Path.Combine(commandsDir, "commandRegistry.json");
                 if (File.Exists(registryFile) && !IsRegistryEmpty(registryFile))
                     return commandsDir;
+                fallback ??= commandsDir;
             }
+            return fallback;
+        }
+
+        /// <summary>
+        /// Dev: path ghi lúc build (bin\...\Commands) để Settings tìm command set khi chạy từ Add-in Manager.
+        /// </summary>
+        public static string TryGetDevCommandsPathFromFile()
+        {
+            try
+            {
+                string file = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "DeepBim-MCP", "dev-commands-path.txt");
+                if (!File.Exists(file)) return null;
+                string path = File.ReadAllText(file)?.Trim();
+                if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return null;
+                return path;
+            }
+            catch { }
             return null;
+        }
+
+        /// <summary>
+        /// Returns candidate Commands paths to try when loading command sets.
+        /// Order: assembly, dev path file (bin khi dev), Revit Addins, plugin default.
+        /// </summary>
+        public static string[] GetCandidateCommandsPaths()
+        {
+            var list = new System.Collections.Generic.List<string>();
+            string a = GetAssemblyCommandsPath();
+            if (!string.IsNullOrEmpty(a)) list.Add(a);
+            string dev = TryGetDevCommandsPathFromFile();
+            if (!string.IsNullOrEmpty(dev) && !list.Contains(dev, StringComparer.OrdinalIgnoreCase)) list.Add(dev);
+            string r = TryGetRevitAddinsCommandsPath();
+            if (!string.IsNullOrEmpty(r) && !list.Contains(r, StringComparer.OrdinalIgnoreCase)) list.Add(r);
+            string g = GetCommandsDirectoryPath();
+            if (!string.IsNullOrEmpty(g) && !list.Contains(g, StringComparer.OrdinalIgnoreCase)) list.Add(g);
+            return list.ToArray();
         }
 
         private static void CreateDefaultCommandRegistryFile(string filePath)

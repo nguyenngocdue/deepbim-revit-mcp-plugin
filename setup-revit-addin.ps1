@@ -36,6 +36,10 @@ if (Test-Path $pluginSource) {
     if (Test-Path $pluginDest) { Remove-Item $pluginDest -Recurse -Force }
     Copy-Item $pluginSource -Destination $pluginDest -Recurse -Force
     Write-Host "  [OK] revit_mcp_plugin\" -ForegroundColor Green
+    # Deploy env: plugin sẽ dùng thư mục AppData (không dùng build output)
+    $envDest = Join-Path $pluginDest "deepbim-mcp.env.json"
+    @{ mode = "deploy"; description = "Deploy: plugin uses this AppData folder. Set by setup-revit-addin.ps1." } | ConvertTo-Json | Set-Content -Path $envDest -Encoding UTF8
+    Write-Host "  [OK] deepbim-mcp.env.json (mode=deploy)" -ForegroundColor Green
 } else {
     Write-Host "  [SKIP] revit_mcp_plugin folder not found" -ForegroundColor Yellow
 }
