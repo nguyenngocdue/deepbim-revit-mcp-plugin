@@ -15,9 +15,10 @@ namespace revit_mcp_plugin.Core
 
         private const string SegoeMdl2 = "Segoe MDL2 Assets";
 
-        // Segoe MDL2 Assets: Power = On/Off, Setting = gear
+        // Segoe MDL2 Assets: Power = On/Off, Setting = gear, Export
         private const string GlyphConnect = "\uE7E8"; // Power (On/Off)
         private const string GlyphSettings = "\uE713"; // Setting
+        private const string GlyphExport = "\uE8B5";  // Export (document/arrow)
 
         public static BitmapSource GetLargeImage(string kind = "mcp")
         {
@@ -31,7 +32,9 @@ namespace revit_mcp_plugin.Core
 
         private static BitmapSource CreateIcon(int size, string kind)
         {
-            string glyph = kind == "settings" ? GlyphSettings : GlyphConnect;
+            string glyph = kind == "settings" ? GlyphSettings
+                : kind == "export" ? GlyphExport
+                : GlyphConnect;
             var dv = new DrawingVisual();
             using (var dc = dv.RenderOpen())
             {

@@ -9,7 +9,8 @@ namespace revit_mcp_plugin.Core
     public class Application : IExternalApplication
     {
         private const string TabName = "DeepBim-MCP";
-        private const string PanelName = "Server";
+        private const string PanelNameServer = "Server";
+        private const string PanelNameTools = "Tools";
 
         public Result OnStartup(UIControlledApplication application)
         {
@@ -31,7 +32,7 @@ namespace revit_mcp_plugin.Core
             }
             catch { /* tab may already exist */ }
 
-            RibbonPanel mcpPanel = application.CreateRibbonPanel(TabName, PanelName);
+            RibbonPanel mcpPanel = application.CreateRibbonPanel(TabName, PanelNameServer);
 
             PushButtonData toggleButton = new PushButtonData(
                 "ID_TOGGLE_MCP",
@@ -52,6 +53,17 @@ namespace revit_mcp_plugin.Core
             settingsButton.LargeImage = RibbonIconHelper.GetLargeImage("settings");
             settingsButton.Image = RibbonIconHelper.GetSmallImage("settings");
             mcpPanel.AddItem(settingsButton);
+
+            RibbonPanel toolsPanel = application.CreateRibbonPanel(TabName, PanelNameTools);
+            PushButtonData exportSheetsButton = new PushButtonData(
+                "ID_EXPORT_SHEETS",
+                "Export Sheets\r\nto Excel",
+                Assembly.GetExecutingAssembly().Location,
+                "revit_mcp_plugin.Core.ExportSheetsToExcel");
+            exportSheetsButton.ToolTip = "Export all sheets with selected properties to Excel";
+            exportSheetsButton.LargeImage = RibbonIconHelper.GetLargeImage("export");
+            exportSheetsButton.Image = RibbonIconHelper.GetSmallImage("export");
+            toolsPanel.AddItem(exportSheetsButton);
 
             return Result.Succeeded;
         }

@@ -4,6 +4,8 @@ using revit_mcp_plugin.Utils;
 using System;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shell;
 
 namespace revit_mcp_plugin.UI
 {
@@ -13,12 +15,23 @@ namespace revit_mcp_plugin.UI
 
         private static readonly SolidColorBrush AccentBrush = new SolidColorBrush(Color.FromRgb(0x59, 0xDC, 0xCB));
         private static readonly SolidColorBrush RedBrush = new SolidColorBrush(Color.FromRgb(0xCC, 0x33, 0x33));
-        private static readonly SolidColorBrush GrayBrush = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC));
+        private static readonly SolidColorBrush GrayBrush = new SolidColorBrush(Color.FromRgb(0x9A, 0x9A, 0x9A));
 
         public MCPStatusWindow(UIApplication uiApp)
         {
             InitializeComponent();
             _uiApp = uiApp;
+
+            var chrome = new WindowChrome
+            {
+                CornerRadius = new CornerRadius(10),
+                CaptionHeight = 44,
+                ResizeBorderThickness = new Thickness(6)
+            };
+            WindowChrome.SetWindowChrome(this, chrome);
+            RootBorder.SizeChanged += (s, _) => UpdateClip();
+
+            Loaded += OnLoaded;
 
             PluginDirText.Text = PathManager.GetPluginDirectoryPath();
             AppendLog($"Plugin: {PathManager.GetPluginDirectoryPath()}");
@@ -51,6 +64,25 @@ namespace revit_mcp_plugin.UI
             Activated += (s, e) => RefreshStatus();
 
             RefreshStatus();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            UpdateClip();
+            try
+            {
+                var uri = new Uri("pack://application:,,,/RevitMCPPlugin;component/Resources/icon.png", UriKind.Absolute);
+                TitleBarIcon.Source = BitmapFrame.Create(uri);
+                Icon = BitmapFrame.Create(uri);
+            }
+            catch { /* icon optional */ }
+        }
+
+        private void UpdateClip()
+        {
+            if (RootBorder.ActualWidth <= 0 || RootBorder.ActualHeight <= 0) return;
+            RootBorder.Clip = new RectangleGeometry(
+                new Rect(0, 0, RootBorder.ActualWidth, RootBorder.ActualHeight), 10, 10);
         }
 
         private void RefreshStatus()
