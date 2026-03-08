@@ -72,19 +72,9 @@ Or copy the contents of `plugin\bin\AddIn 2025 Debug\` to:
 ### 3. Start Revit
 
 1. Open Revit 2025 and load a project
-2. Go to **Add-Ins** tab → **DeepBim-MCP** → click **Connect Server**
-3. In the **DeepBim-MCP Server Control** window, click **Start** (or it auto-starts)
-4. Verify status shows **Running** and the port (e.g. 8081)
-
-![DeepBim-MCP Server Control](images/MCP%20Server%20Control.png)
-
-*DeepBim-MCP Server Control — trạng thái server, port, đường dẫn plugin và log.*
-
-5. (Tùy chọn) Mở **Settings** để bật/tắt từng command set và từng lệnh MCP.
-
-![DeepBim-MCP Settings](images/MCP-Settings.png)
-
-*DeepBim-MCP Settings — Command Set Settings: chọn command set, bật/tắt từng command.*
+2. Go to **Add-Ins** tab → **DeepBim-MCP** → **Server** panel → click **Connect Server**
+3. In the **DeepBim-MCP Server Control** window, click **Start** (or it may auto-start)
+4. Verify status shows **Running** and note the port (e.g. 8081) and plugin path
 
 ### 4. Configure Claude Desktop
 
@@ -102,6 +92,20 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json`:
 ```
 
 Use an absolute path to `server/build/index.js`. Restart Claude Desktop. When you see the 🔨 icon, the MCP server is connected.
+
+## Plugin UI
+
+### Server Control
+
+The **DeepBim-MCP Server Control** window shows the MCP server status, listening port, and plugin/commands paths. Use **Start** / **Stop** to control the connection that AI clients use to talk to Revit.
+
+![DeepBim-MCP Server Control](images/MCP-Server-Control.png)
+
+### Settings — Command Set
+
+**DeepBim-MCP Settings** → **Command Set Settings** lets you choose which MCP commands are available in Revit. Enable or disable entire command sets, or individual commands (e.g. `say_hello`, `get_current_view_info`, `export_sheets_to_excel`). Use **Open folder**, **Refresh**, **Select all** / **Deselect all**, then **Save** to apply.
+
+![DeepBim-MCP Settings — Command Set](images/MCP-Settings.png)
 
 ## Supported Tools
 
