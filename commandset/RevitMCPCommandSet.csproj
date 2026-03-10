@@ -6,6 +6,8 @@
         <ImplicitUsings>true</ImplicitUsings>
         <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
         <DefineConstants>$(DefineConstants);REVIT2022_OR_GREATER;REVIT2023_OR_GREATER;REVIT2024_OR_GREATER</DefineConstants>
+        <AddinManifestName>DeepBimRevitMCPlugin.addin</AddinManifestName>
+        <AddinFolderName>DeepBimRevitMCPlugin</AddinFolderName>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -42,7 +44,7 @@
     <!-- Post-build: copy CommandSet to plugin bin; if mode=Deploy also copy to AppData -->
     <Target Name="DeployCommandSet" AfterTargets="Build" DependsOnTargets="ReadBuildMode">
         <PropertyGroup>
-            <PluginAddInRoot>$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\revit_mcp_plugin\</PluginAddInRoot>
+            <PluginAddInRoot>$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\$(AddinFolderName)\</PluginAddInRoot>
             <CommandSetPluginDir>$(PluginAddInRoot)Commands\RevitMCPCommandSet\</CommandSetPluginDir>
             <CommandSetVersionDir>$(CommandSetPluginDir)$(RevitVersion)\</CommandSetVersionDir>
             <RegistryFile>$(PluginAddInRoot)Commands\commandRegistry.json</RegistryFile>
@@ -62,10 +64,10 @@
         <PropertyGroup>
             <RevitAddinsRoot>$(AppData)\Autodesk\Revit\Addins\$(RevitVersion)\</RevitAddinsRoot>
         </PropertyGroup>
-        <Copy SourceFiles="$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\revit-mcp-plugin.addin" DestinationFolder="$(RevitAddinsRoot)" Condition="'$(_CopyToAppData)'=='true' And Exists('$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\revit-mcp-plugin.addin')" />
+        <Copy SourceFiles="$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\$(AddinManifestName)" DestinationFolder="$(RevitAddinsRoot)" Condition="'$(_CopyToAppData)'=='true' And Exists('$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(BaseConfiguration)\$(AddinManifestName)')" />
         <ItemGroup>
             <AddInFiles Include="$(PluginAddInRoot)**\*" />
         </ItemGroup>
-        <Copy SourceFiles="@(AddInFiles)" DestinationFiles="@(AddInFiles->'$(RevitAddinsRoot)revit_mcp_plugin\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="'$(_CopyToAppData)'=='true'" />
+        <Copy SourceFiles="@(AddInFiles)" DestinationFiles="@(AddInFiles->'$(RevitAddinsRoot)$(AddinFolderName)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="'$(_CopyToAppData)'=='true'" />
     </Target>
 </Project>

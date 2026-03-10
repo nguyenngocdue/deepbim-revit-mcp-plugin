@@ -8,8 +8,8 @@ Plugin đọc file **deepbim-mcp.env.json** (cùng thư mục với RevitMCPPlug
 
 | Bạn làm gì | Mode | Ai tạo/sửa deepbim-mcp.env.json? |
 |------------|------|-----------------------------------|
-| **Build Solution với Configuration = Debug** | **dev** | Project tự copy `env.dev.json` → output thành `deepbim-mcp.env.json` (trong `AddIn 2025 Debug\revit_mcp_plugin\`). Bạn không cần set gì. |
-| **Chạy setup-revit-addin.ps1** (deploy) | **deploy** | Script ghi `deepbim-mcp.env.json` (mode=deploy) vào `%APPDATA%\...\revit_mcp_plugin\`. |
+| **Build Solution với Configuration = Debug** | **dev** | Project tự copy `env.dev.json` → output thành `deepbim-mcp.env.json` (trong `AddIn 2025 Debug\DeepBimRevitMCPlugin\`). Bạn không cần set gì. |
+| **Chạy setup-revit-addin.ps1** (deploy) | **deploy** | Script ghi `deepbim-mcp.env.json` (mode=deploy) vào `%APPDATA%\...\DeepBimRevitMCPlugin\`. |
 
 **Khi đang code (dev):** Chỉ cần để **Debug** trên toolbar Visual Studio rồi Build Solution. Mode = dev đã được set tự động qua file copy trong project.
 
@@ -19,8 +19,8 @@ Plugin đọc file **deepbim-mcp.env.json** (cùng thư mục với RevitMCPPlug
 
 | mode | Thư mục plugin dùng |
 |------|----------------------|
-| **dev** | Thư mục chứa DLL (vd: `...\AddIn 2025 Debug\revit_mcp_plugin`) |
-| **deploy** | `%APPDATA%\Autodesk\Revit\Addins\2025\revit_mcp_plugin` |
+| **dev** | Thư mục chứa DLL (vd: `...\AddIn 2025 Debug\DeepBimRevitMCPlugin`) |
+| **deploy** | `%APPDATA%\Autodesk\Revit\Addins\2025\DeepBimRevitMCPlugin` |
 
 ## File trong repo
 

@@ -4,6 +4,10 @@
 $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $versionsFile = Join-Path $ScriptDir "RevitVersions.json"
+$AddinManifestName = "DeepBimRevitMCPlugin.addin"
+$AddinFolderName = "DeepBimRevitMCPlugin"
+$LegacyAddinManifestName = "revit-mcp-plugin.addin"
+$LegacyAddinFolderName = "revit_mcp_plugin"
 
 if (-not (Test-Path $versionsFile)) {
     Write-Host "RevitVersions.json not found. Create it with revitVersions array (e.g. [2024, 2025, 2026])." -ForegroundColor Red
@@ -35,26 +39,37 @@ foreach ($ver in $versionList) {
     Write-Host "    Target: $RevitAddinsPath" -ForegroundColor Gray
 
     New-Item -ItemType Directory -Path $RevitAddinsPath -Force | Out-Null
-
-    $addinFile = Join-Path $AddInSource "revit-mcp-plugin.addin"
-    if (Test-Path $addinFile) {
-        Copy-Item $addinFile -Destination $RevitAddinsPath -Force
-        Write-Host "    [OK] revit-mcp-plugin.addin" -ForegroundColor Green
-    } else {
-        Write-Host "    [SKIP] revit-mcp-plugin.addin not found" -ForegroundColor Yellow
+    $legacyAddinPath = Join-Path $RevitAddinsPath $LegacyAddinManifestName
+    if (Test-Path $legacyAddinPath) {
+        Remove-Item $legacyAddinPath -Force
+        Write-Host "    [OK] Removed legacy manifest: $LegacyAddinManifestName" -ForegroundColor DarkGray
     }
 
-    $pluginSource = Join-Path $AddInSource "revit_mcp_plugin"
-    $pluginDest = Join-Path $RevitAddinsPath "revit_mcp_plugin"
+    $legacyPluginPath = Join-Path $RevitAddinsPath $LegacyAddinFolderName
+    if (Test-Path $legacyPluginPath) {
+        Remove-Item $legacyPluginPath -Recurse -Force
+        Write-Host "    [OK] Removed legacy folder: $LegacyAddinFolderName\" -ForegroundColor DarkGray
+    }
+
+    $addinFile = Join-Path $AddInSource $AddinManifestName
+    if (Test-Path $addinFile) {
+        Copy-Item $addinFile -Destination $RevitAddinsPath -Force
+        Write-Host "    [OK] $AddinManifestName" -ForegroundColor Green
+    } else {
+        Write-Host "    [SKIP] $AddinManifestName not found" -ForegroundColor Yellow
+    }
+
+    $pluginSource = Join-Path $AddInSource $AddinFolderName
+    $pluginDest = Join-Path $RevitAddinsPath $AddinFolderName
     if (Test-Path $pluginSource) {
         if (Test-Path $pluginDest) { Remove-Item $pluginDest -Recurse -Force }
         Copy-Item $pluginSource -Destination $pluginDest -Recurse -Force
-        Write-Host "    [OK] revit_mcp_plugin\" -ForegroundColor Green
+        Write-Host "    [OK] $AddinFolderName\" -ForegroundColor Green
         $envDest = Join-Path $pluginDest "deepbim-mcp.env.json"
         @{ mode = "deploy"; description = "Deploy: plugin uses this AppData folder. Set by setup-revit-addin.ps1." } | ConvertTo-Json | Set-Content -Path $envDest -Encoding UTF8
         Write-Host "    [OK] deepbim-mcp.env.json (mode=deploy)" -ForegroundColor Green
     } else {
-        Write-Host "    [SKIP] revit_mcp_plugin folder not found" -ForegroundColor Yellow
+        Write-Host "    [SKIP] $AddinFolderName folder not found" -ForegroundColor Yellow
     }
 }
 

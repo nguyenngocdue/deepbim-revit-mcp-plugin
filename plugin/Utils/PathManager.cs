@@ -10,6 +10,11 @@ namespace revit_mcp_plugin.Utils
         private static string _pluginDirectory;
 
         private const string EnvFileName = "deepbim-mcp.env.json";
+        private static readonly string[] AddinsPluginFolderNames =
+        {
+            "DeepBimRevitMCPlugin",
+            "revit_mcp_plugin" // Backward compatibility
+        };
 
         public static string GetPluginDirectoryPath()
         {
@@ -184,7 +189,9 @@ namespace revit_mcp_plugin.Utils
         }
 
         /// <summary>
-        /// Gets the add-in folder in Revit Addins (e.g. %APPDATA%\Autodesk\Revit\Addins\YYYY\revit_mcp_plugin) if it exists.
+        /// Gets the add-in folder in Revit Addins
+        /// (e.g. %APPDATA%\Autodesk\Revit\Addins\YYYY\DeepBimRevitMCPlugin) if it exists.
+        /// Also supports legacy folder name "revit_mcp_plugin".
         /// Versions to search come from RevitVersions.json when present.
         /// </summary>
         private static string GetRevitAddinsPluginPath()
@@ -193,9 +200,12 @@ namespace revit_mcp_plugin.Utils
             string[] revitVersions = GetRevitVersionsToSearch();
             foreach (var ver in revitVersions)
             {
-                string pluginDir = Path.Combine(appData, "Autodesk", "Revit", "Addins", ver, "revit_mcp_plugin");
-                if (Directory.Exists(pluginDir))
-                    return pluginDir;
+                foreach (var folderName in AddinsPluginFolderNames)
+                {
+                    string pluginDir = Path.Combine(appData, "Autodesk", "Revit", "Addins", ver, folderName);
+                    if (Directory.Exists(pluginDir))
+                        return pluginDir;
+                }
             }
             return null;
         }
@@ -324,12 +334,15 @@ namespace revit_mcp_plugin.Utils
             string fallback = null;
             foreach (var ver in revitVersions)
             {
-                string commandsDir = Path.Combine(appData, "Autodesk", "Revit", "Addins", ver, "revit_mcp_plugin", "Commands");
-                if (!Directory.Exists(commandsDir)) continue;
-                string registryFile = Path.Combine(commandsDir, "commandRegistry.json");
-                if (File.Exists(registryFile) && !IsRegistryEmpty(registryFile))
-                    return commandsDir;
-                fallback ??= commandsDir;
+                foreach (var folderName in AddinsPluginFolderNames)
+                {
+                    string commandsDir = Path.Combine(appData, "Autodesk", "Revit", "Addins", ver, folderName, "Commands");
+                    if (!Directory.Exists(commandsDir)) continue;
+                    string registryFile = Path.Combine(commandsDir, "commandRegistry.json");
+                    if (File.Exists(registryFile) && !IsRegistryEmpty(registryFile))
+                        return commandsDir;
+                    fallback ??= commandsDir;
+                }
             }
             return fallback;
         }

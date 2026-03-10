@@ -58,15 +58,20 @@ Or copy the contents of `plugin\bin\AddIn 2025 Debug\` to:
 
 ```
 %AppData%\Autodesk\Revit\Addins\2025\
-├── revit-mcp-plugin.addin
-└── revit_mcp_plugin\
+├── DeepBimRevitMCPlugin.addin
+└── DeepBimRevitMCPlugin\
     ├── RevitMCPPlugin.dll
-    └── Commands\
-        ├── commandRegistry.json
-        └── RevitMCPCommandSet\
-            ├── command.json
-            └── 2025\
-                └── RevitMCPCommandSet.dll
+    ├── Commands\
+    │   ├── commandRegistry.json
+    │   └── RevitMCPCommandSet\
+    │       ├── command.json
+    │       └── 2025\
+    │           └── RevitMCPCommandSet.dll
+    └── server\
+        ├── index.js
+        ├── database\
+        ├── tools\
+        └── utils\
 ```
 
 ### 3. Start Revit

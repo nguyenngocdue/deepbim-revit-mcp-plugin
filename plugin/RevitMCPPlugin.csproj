@@ -7,6 +7,8 @@
         <PlatformTarget>x64</PlatformTarget>
         <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
         <EnableDynamicLoading>true</EnableDynamicLoading>
+        <AddinManifestName>DeepBimRevitMCPlugin.addin</AddinManifestName>
+        <AddinFolderName>DeepBimRevitMCPlugin</AddinFolderName>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -33,7 +35,7 @@
         <Resource Include="Resources\icon.png" />
     </ItemGroup>
     <ItemGroup>
-        <None Update="revit-mcp-plugin.addin">
+        <None Update="DeepBimRevitMCPlugin.addin">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
@@ -42,19 +44,21 @@
     <!-- Post-build: assemble AddIn layout (cùng cấu trúc khi deploy / Add-in Manager) -->
     <Target Name="AssembleAddIn" AfterTargets="CoreBuild">
         <ItemGroup>
-            <RootItem Include="$(ProjectDir)*.addin" />
+            <RootItem Include="$(ProjectDir)$(AddinManifestName)" />
             <AddinItem Include="$(TargetDir)*.dll" />
             <AddinItem Include="$(TargetDir)*.pdb" />
         </ItemGroup>
 
         <PropertyGroup>
             <RootDir>bin\AddIn $(RevitVersion) $(BaseConfiguration)\</RootDir>
-            <AddinDir>$(RootDir)revit_mcp_plugin\</AddinDir>
+            <AddinDir>$(RootDir)$(AddinFolderName)\</AddinDir>
             <CommandsDir>$(AddinDir)Commands\</CommandsDir>
             <CommandSetDir>$(CommandsDir)RevitMCPCommandSet\</CommandSetDir>
             <CommandSetVersionDir>$(CommandSetDir)$(RevitVersion)\</CommandSetVersionDir>
             <CommandJsonSrc>$(ProjectDir)..\command.json</CommandJsonSrc>
             <CommandSetBinDir>$(ProjectDir)..\commandset\bin\$(Configuration)\net8.0-windows10.0.19041.0\</CommandSetBinDir>
+            <ServerBuildDir>$(ProjectDir)..\server\build\</ServerBuildDir>
+            <ServerDir>$(AddinDir)server\</ServerDir>
         </PropertyGroup>
 
         <!-- Plugin DLLs -->
@@ -65,6 +69,14 @@
 
         <!-- Dev: when running from AddIn folder, plugin loads Commands from here -->
         <Copy SourceFiles="$(ProjectDir)env.dev.json" DestinationFiles="$(AddinDir)deepbim-mcp.env.json" Condition="'$(BaseConfiguration)'=='Debug'" />
+
+        <!-- MCP server build output -->
+        <ItemGroup Condition="Exists('$(ServerBuildDir)index.js')">
+            <ServerBuildFiles Include="$(ServerBuildDir)**\*.*" />
+        </ItemGroup>
+        <MakeDir Directories="$(ServerDir)" Condition="Exists('$(ServerBuildDir)index.js')" />
+        <Copy SourceFiles="@(ServerBuildFiles)" DestinationFiles="@(ServerBuildFiles->'$(ServerDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="Exists('$(ServerBuildDir)index.js')" />
+        <Copy SourceFiles="$(ProjectDir)..\server\revit-data.db" DestinationFolder="$(ServerDir)" Condition="Exists('$(ProjectDir)..\server\revit-data.db')" />
 
         <!-- Commands: replace {VERSION} with RevitVersion -->
         <MakeDir Directories="$(CommandSetVersionDir)" />
