@@ -4,11 +4,11 @@
         <OutputType>Library</OutputType>
         <RootNamespace>DeepBimMCPTools</RootNamespace>
         <AssemblyName>CommandDeepBimMCPTools</AssemblyName>
-        <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+        <TargetFramework>$(RevitTFM)</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>true</ImplicitUsings>
-        <RevitVersion Condition="'$(RevitVersion)' == ''">2025</RevitVersion>
+        <RevitVersion Condition="'$(RevitVersion)' == ''">2026</RevitVersion>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitVersion).*" />

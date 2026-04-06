@@ -41,7 +41,7 @@ namespace DeepBimMCPTools
 
             var result = new SurfaceExtractionResult
             {
-                ElementId = element.Id.IntegerValue,
+                ElementId = (int)element.Id.Value,
                 ElementUniqueId = element.UniqueId ?? string.Empty,
                 ElementName = element.Name ?? string.Empty,
                 CategoryName = element.Category?.Name ?? string.Empty
@@ -99,7 +99,7 @@ namespace DeepBimMCPTools
                 AreaSquareFeet = face.Area,
                 AreaSquareMeters = face.Area * SquareFeetToSquareMeters,
                 EdgeLoopCount = face.EdgeLoops?.Size ?? 0,
-                MaterialElementId = face.MaterialElementId?.IntegerValue ?? -1
+                MaterialElementId = (int)(face.MaterialElementId?.Value ?? -1)
             };
 
             if (face.Reference != null)

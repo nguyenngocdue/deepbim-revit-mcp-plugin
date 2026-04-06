@@ -5,8 +5,8 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <UseWPF>true</UseWPF>
         <PlatformTarget>x64</PlatformTarget>
-        <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
-        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <TargetFramework>$(RevitTFM)</TargetFramework>
+        <EnableDynamicLoading Condition="'$(RevitTFM)' != 'net48'">true</EnableDynamicLoading>
         <AddinManifestName>DeepBimRevitMCPlugin.addin</AddinManifestName>
         <AddinFolderName>DeepBimRevitMCPlugin</AddinFolderName>
     </PropertyGroup>
@@ -47,6 +47,8 @@
             <RootItem Include="$(ProjectDir)$(AddinManifestName)" />
             <AddinItem Include="$(TargetDir)*.dll" />
             <AddinItem Include="$(TargetDir)*.pdb" />
+            <AddinItem Include="$(TargetDir)*.runtimeconfig.json" />
+            <AddinItem Include="$(TargetDir)*.deps.json" />
         </ItemGroup>
 
         <PropertyGroup>
@@ -56,7 +58,7 @@
             <CommandSetDir>$(CommandsDir)RevitMCPCommandSet\</CommandSetDir>
             <CommandSetVersionDir>$(CommandSetDir)$(RevitVersion)\</CommandSetVersionDir>
             <CommandJsonSrc>$(ProjectDir)..\command.json</CommandJsonSrc>
-            <CommandSetBinDir>$(ProjectDir)..\commandset\bin\$(Configuration)\net8.0-windows10.0.19041.0\</CommandSetBinDir>
+            <CommandSetBinDir>$(ProjectDir)..\commandset\bin\$(Configuration)\$(RevitTFM)\</CommandSetBinDir>
             <ServerBuildDir>$(ProjectDir)..\server\build\</ServerBuildDir>
             <ServerDir>$(AddinDir)server\</ServerDir>
         </PropertyGroup>
