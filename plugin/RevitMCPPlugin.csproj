@@ -33,6 +33,9 @@
 
     <ItemGroup>
         <Resource Include="Resources\icon.png" />
+        <Resource Include="Resources\deepbim-logo.png" />
+        <Resource Include="Resources\deepbim-logo-56.png" />
+        <Resource Include="Resources\deepbim-logo-512.png" />
     </ItemGroup>
     <ItemGroup>
         <None Update="DeepBimRevitMCPlugin.addin">

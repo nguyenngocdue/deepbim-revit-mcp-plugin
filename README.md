@@ -8,18 +8,15 @@ DeepBim-MCP enables AI assistants like Claude, Cursor, and other MCP-compatible 
 
 ## Architecture
 
-```
-┌─────────────────┐     stdio      ┌──────────────────┐     TCP      ┌─────────────────┐
-│  AI Client      │ ◄────────────► │  MCP Server      │ ◄──────────► │  Revit Plugin   │
-│  (Claude, etc.) │                │  (Node.js)       │  8080-8099   │  (C# Add-in)     │
-└─────────────────┘                └──────────────────┘              └────────┬────────┘
-                                                                              │
-                                                                              ▼
-                                                                     ┌─────────────────┐
-                                                                     │  Command Set    │
-                                                                     │  (Revit API)    │
-                                                                     └─────────────────┘
-```
+flowchart LR
+    A["AI Client<br/>(Claude, etc.)"]
+    B["MCP Server<br/>(Node.js)"]
+    C["Revit Plugin<br/>(C# Add-in)"]
+    D["Command Set<br/>(Revit API)"]
+
+    A <--> |stdio| B
+    B <--> |TCP<br/>8080-8099| C
+    C --> D
 
 - **MCP Server** (TypeScript): Translates tool calls from AI clients into TCP messages
 - **Revit Plugin** (C#): Runs inside Revit, listens on port 8080–8099, dispatches to Command Set
@@ -69,6 +66,7 @@ Or copy the contents of `plugin\bin\AddIn 2025 Debug\` to:
     │           └── RevitMCPCommandSet.dll
     └── server\
         ├── index.js
+        ├── node_modules\   # present when installed from MSI (production deps)
         ├── database\
         ├── tools\
         └── utils\
@@ -81,22 +79,72 @@ Or copy the contents of `plugin\bin\AddIn 2025 Debug\` to:
 3. In the **DeepBim-MCP Server Control** window, click **Start** (or it may auto-start)
 4. Verify status shows **Running** and note the port (e.g. 8081) and plugin path
 
-### 4. Configure Claude Desktop
+### 4. Configure MCP clients (Claude, Cursor, others)
 
-Edit `%APPDATA%\Claude\claude_desktop_config.json`:
+Point your MCP client at the Node entry file using **`command`: `node`** and a **single absolute path** in `args`. Use **escaped backslashes** (`\\`) in JSON on Windows.
+
+#### After add-in install (MSI or copy into Revit Add-ins)
+
+The MCP server is bundled next to the add-in. Path pattern:
+
+```text
+%AppData%\Autodesk\Revit\Addins\<RevitYear>\DeepBimRevitMCPlugin\server\index.js
+```
+
+`<RevitYear>` is the Revit version folder you installed into (`2024`, `2025`, `2026`, …).
+
+Example (Revit 2025, user `alex`):
+
+```text
+C:\Users\alex\AppData\Roaming\Autodesk\Revit\Addins\2025\DeepBimRevitMCPlugin\server\index.js
+```
+
+Keep the whole `server\` folder intact (`node_modules`, `tools`, etc.); only reference **`index.js`**.
+
+**Before using tools:** Node.js must be on `PATH`, Revit must be open, and **DeepBim-MCP → Connect Server** must be **Running** so the plugin listens on TCP 8080–8099.
+
+**Claude Desktop** — edit `%AppData%\Claude\claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "deepbim-mcp-server": {
       "command": "node",
-      "args": ["<path-to-project>/server/build/index.js"]
+      "args": [
+        "C:\\Users\\alex\\AppData\\Roaming\\Autodesk\\Revit\\Addins\\2025\\DeepBimRevitMCPlugin\\server\\index.js"
+      ]
     }
   }
 }
 ```
 
-Use an absolute path to `server/build/index.js`. Restart Claude Desktop. When you see the 🔨 icon, the MCP server is connected.
+**Cursor** — same shape in MCP settings (e.g. project or user `.cursor/mcp.json`).
+
+**Other MCP-compatible editors** — same `command` / `args` pattern.
+
+**Multiple Revit versions** — each year has its own `Addins\<year>\` tree and its own `...\server\index.js`. Point `args` at the install that matches the Revit session you use, or define separate server names for each year.
+
+#### From a development clone (repository)
+
+Build first (`npm run build` in `server/`), then use the compiled file under the repo:
+
+```json
+{
+  "mcpServers": {
+    "deepbim-mcp-server": {
+      "command": "node",
+      "args": ["D:\\src\\revit-mcp-plugin\\server\\build\\index.js"]
+    }
+  }
+}
+```
+
+| Scenario | Typical `args` path |
+|----------|---------------------|
+| Installed add-in | `%AppData%\...\Addins\<year>\DeepBimRevitMCPlugin\server\index.js` |
+| Local development | `<repo>\server\build\index.js` |
+
+Fully quit and restart the IDE after changing MCP config. In Claude Desktop, a 🔨 icon indicates the MCP server loaded.
 
 ## Plugin UI
 
