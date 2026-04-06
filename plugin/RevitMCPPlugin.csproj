@@ -28,7 +28,7 @@
         <PackageReference Include="ClosedXML" Version="0.104.1" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\tools\CommandDeepBimMCPTools.csproj" />
+        <ProjectReference Include="..\tools\DeepBimMCPToolCommands.csproj" />
     </ItemGroup>
 
     <ItemGroup>

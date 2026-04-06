@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "deepbim-mcp-server": {
+    "deepbim-mcp-server-v2": {
       "command": "node",
       "args": ["server/build/index.js"]
     }

@@ -1,17 +1,16 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11520.95 d18.3
+VisualStudioVersion = 18.3.11520.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevitMCPPlugin", "plugin\RevitMCPPlugin.csproj", "{B1A2C3D4-E5F6-7890-ABCD-111111111111}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevitMCPCommandSet", "commandset\RevitMCPCommandSet.csproj", "{B1A2C3D4-E5F6-7890-ABCD-222222222222}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandDeepBimMCPTools", "tools\CommandDeepBimMCPTools.csproj", "{B1A2C3D4-E5F6-7890-ABCD-333333333334}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepBimMCPToolCommands", "tools\DeepBimMCPToolCommands.csproj", "{B1A2C3D4-E5F6-7890-ABCD-333333333334}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
 		Debug-2019|Any CPU = Debug-2019|Any CPU
 		Debug-2020|Any CPU = Debug-2020|Any CPU
 		Debug-2021|Any CPU = Debug-2021|Any CPU
@@ -20,6 +19,7 @@ Global
 		Debug-2024|Any CPU = Debug-2024|Any CPU
 		Debug-2025|Any CPU = Debug-2025|Any CPU
 		Debug-2026|Any CPU = Debug-2026|Any CPU
+		Release|Any CPU = Release|Any CPU
 		Release-2019|Any CPU = Release-2019|Any CPU
 		Release-2020|Any CPU = Release-2020|Any CPU
 		Release-2021|Any CPU = Release-2021|Any CPU
@@ -32,8 +32,6 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Debug-2019|Any CPU.ActiveCfg = Debug-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Debug-2019|Any CPU.Build.0 = Debug-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Debug-2020|Any CPU.ActiveCfg = Debug-2020|Any CPU
@@ -50,6 +48,8 @@ Global
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Debug-2025|Any CPU.Build.0 = Debug-2025|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Debug-2026|Any CPU.ActiveCfg = Debug-2026|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Debug-2026|Any CPU.Build.0 = Debug-2026|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Release-2019|Any CPU.ActiveCfg = Release-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Release-2019|Any CPU.Build.0 = Release-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Release-2020|Any CPU.ActiveCfg = Release-2020|Any CPU
@@ -68,8 +68,6 @@ Global
 		{B1A2C3D4-E5F6-7890-ABCD-111111111111}.Release-2026|Any CPU.Build.0 = Release-2026|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Debug-2019|Any CPU.ActiveCfg = Debug-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Debug-2019|Any CPU.Build.0 = Debug-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Debug-2020|Any CPU.ActiveCfg = Debug-2020|Any CPU
@@ -86,6 +84,8 @@ Global
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Debug-2025|Any CPU.Build.0 = Debug-2025|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Debug-2026|Any CPU.ActiveCfg = Debug-2026|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Debug-2026|Any CPU.Build.0 = Debug-2026|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Release-2019|Any CPU.ActiveCfg = Release-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Release-2019|Any CPU.Build.0 = Release-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Release-2020|Any CPU.ActiveCfg = Release-2020|Any CPU
@@ -104,8 +104,6 @@ Global
 		{B1A2C3D4-E5F6-7890-ABCD-222222222222}.Release-2026|Any CPU.Build.0 = Release-2026|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Debug-2019|Any CPU.ActiveCfg = Debug-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Debug-2019|Any CPU.Build.0 = Debug-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Debug-2020|Any CPU.ActiveCfg = Debug-2020|Any CPU
@@ -122,6 +120,8 @@ Global
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Debug-2025|Any CPU.Build.0 = Debug-2025|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Debug-2026|Any CPU.ActiveCfg = Debug-2026|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Debug-2026|Any CPU.Build.0 = Debug-2026|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Release-2019|Any CPU.ActiveCfg = Release-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Release-2019|Any CPU.Build.0 = Release-2019|Any CPU
 		{B1A2C3D4-E5F6-7890-ABCD-333333333334}.Release-2020|Any CPU.ActiveCfg = Release-2020|Any CPU

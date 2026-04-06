@@ -2,6 +2,14 @@ import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
 
+const ExecutionParameterSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+  z.record(z.string(), z.unknown()),
+]);
+
 export function registerSendCodeToRevitTool(server: McpServer) {
   server.tool(
     "send_code_to_revit",
@@ -13,7 +21,7 @@ export function registerSendCodeToRevitTool(server: McpServer) {
           "The C# code to execute in Revit. This code will be inserted into the Execute method of a template with access to Document and parameters."
         ),
       parameters: z
-        .array(z.any())
+        .array(ExecutionParameterSchema)
         .optional()
         .describe(
           "Optional execution parameters that will be passed to your code"

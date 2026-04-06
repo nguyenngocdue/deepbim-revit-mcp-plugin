@@ -7,13 +7,9 @@ using System.Reflection;
 
 namespace DeepBimMCPTools
 {
-    /// <summary>
-    /// Gọi trực tiếp command trong RevitMCPCommandSet (không cần MCP server).
-    /// Dùng cho panel Tools để test từng chức năng.
-    /// </summary>
-    public static class DirectCommandInvoker
+    public sealed class DirectCommandGateway : ICommandGateway
     {
-        public static object Invoke(UIApplication uiApp, string methodName, JObject parameters = null)
+        public object Invoke(UIApplication uiApp, string methodName, JObject parameters = null)
         {
             if (uiApp == null) throw new ArgumentNullException(nameof(uiApp));
             if (string.IsNullOrEmpty(methodName)) throw new ArgumentException("methodName is required.", nameof(methodName));
@@ -43,7 +39,10 @@ namespace DeepBimMCPTools
                     else
                         command = (IRevitCommand)Activator.CreateInstance(type);
                 }
-                catch { continue; }
+                catch
+                {
+                    continue;
+                }
 
                 if (command?.CommandName != methodName) continue;
 

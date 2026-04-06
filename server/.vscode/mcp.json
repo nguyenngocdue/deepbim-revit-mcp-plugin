@@ -1,6 +1,6 @@
 {
 	"servers": {
-		"deepbim-mcp-server": {
+		"deepbim-mcp-server-v2": {
 			"type": "stdio",
 			"command": "node",
 			"args": [
