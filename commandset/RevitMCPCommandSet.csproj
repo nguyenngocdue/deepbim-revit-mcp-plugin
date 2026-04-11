@@ -28,6 +28,10 @@
         <PackageReference Include="Nice3point.Revit.Extensions" Version="$(RevitVersion).*" />
         <PackageReference Include="RevitMCPSDK" Version="$(RevitVersion).*" />
         <PackageReference Include="ClosedXML" Version="0.104.1" />
+		
+		<!-- Reference to the shared command library project -->
+		<ProjectReference Include="..\DevTooV2lCommands\DevToolV2Commands.csproj" />
+		
     </ItemGroup>
 
     <!-- Đọc build-mode.txt: Dev = chỉ copy vào bin; Deploy = copy thêm vào AppData -->

@@ -85,7 +85,9 @@ Commands/
  OperateElementCommand.cs
  TagRoomsCommand.cs
  TagWallsCommand.cs
- Test/SayHelloCommand.cs
+ Test/
+  SayHelloCommand.cs
+  SayHelloV2Command.cs
 GlobalUsings.cs
 Models/
  AIResult.cs
@@ -180,6 +182,7 @@ Services/
  GetSelectedElementsEventHandler.cs
  OperateElementEventHandler.cs
  SayHelloEventHandler.cs
+ SayHelloV2EventHandler.cs
  TagRoomsEventHandler.cs
  TagWallsEventHandler.cs
 Utils/
@@ -192,6 +195,7 @@ Utils/
  TransactionUtils.cs
 
 [metadataReferences]
+../DevTooV2lCommands/obj/Debug/net8.0-windows10.0.19041.0/ref/DevToolV2Commands.dll
 <NUGET>/
  closedxml.parser/1.2.0/lib/netstandard2.1/ClosedXML.Parser.dll
  closedxml/0.104.1/lib/netstandard2.1/ClosedXML.dll
