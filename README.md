@@ -8,6 +8,7 @@ DeepBim-MCP enables AI assistants like Claude, Cursor, and other MCP-compatible 
 
 ## Architecture
 
+```mermaid
 flowchart LR
     A["AI Client<br/>(Claude, etc.)"]
     B["MCP Server<br/>(Node.js)"]
@@ -17,6 +18,7 @@ flowchart LR
     A <--> |stdio| B
     B <--> |TCP<br/>8080-8099| C
     C --> D
+```
 
 - **MCP Server** (TypeScript): Translates tool calls from AI clients into TCP messages
 - **Revit Plugin** (C#): Runs inside Revit, listens on port 8080–8099, dispatches to Command Set
