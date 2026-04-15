@@ -7,7 +7,6 @@
   },
   "commands": [
     { "commandName": "say_hello", "description": "Displays a greeting dialog", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
-    { "commandName": "say_hello_v2", "description": "Displays a greeting dialog using DevToolV2Commands logic", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "get_available_family_types", "description": "Get available family types", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "get_current_view_elements", "description": "Get current view elements", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "get_current_view_info", "description": "Get current view info", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
@@ -31,6 +30,7 @@
     { "commandName": "send_code_to_revit", "description": "Execute dynamic C# code in Revit", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "create_dimensions", "description": "Create dimension annotations between elements or points", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "get_sheet_exportable_properties", "description": "Get list of sheet parameters that can be exported to Excel", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
-    { "commandName": "export_sheets_to_excel", "description": "Export all sheets with selected properties to an Excel file", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true }
+    { "commandName": "export_sheets_to_excel", "description": "Export all sheets with selected properties to an Excel file", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "hello_world", "description": "Show a hello world dialog in Revit with user's full name", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true }
   ]
 }

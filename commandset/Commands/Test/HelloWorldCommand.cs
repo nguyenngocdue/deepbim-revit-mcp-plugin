@@ -14,7 +14,7 @@ namespace RevitMCPCommandSet.Commands.Test
 
         public override string CommandName => "hello_world";
 
-        public HelloWorldCommand(IWaitableExternalEventHandler handler, UIApplication uiApp)
+        public HelloWorldCommand(HelloWorldEventHandler handler, UIApplication uiApp)
       : base(handler, uiApp)
         {
         }
