@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  DeepBim-MCP Installer for Revit
+
+  Build examples:
+    dotnet build -p:RevitVersion=2025 -p:ProductVersion=1.0.0 -c Release
+    dotnet build -p:RevitVersion=2024 -p:ProductVersion=1.0.0 -c Release
+
+  The installer deploys files to:
+    %APPDATA%\Autodesk\Revit\Addins\{RevitVersion}\
+-->
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <!-- Per-version UpgradeCode (must be valid hex GUIDs, stable per version) -->
+  <?if $(var.RevitVersion) = 2020 ?>
+    <?define UpgradeCode = "DE3EB1A0-2020-4A5B-9C0D-A1B2C3D4E5F0" ?>
+  <?elseif $(var.RevitVersion) = 2021 ?>
+    <?define UpgradeCode = "DE3EB1A0-2021-4A5B-9C0D-A1B2C3D4E5F1" ?>
+  <?elseif $(var.RevitVersion) = 2022 ?>
+    <?define UpgradeCode = "DE3EB1A0-2022-4A5B-9C0D-A1B2C3D4E5F2" ?>
+  <?elseif $(var.RevitVersion) = 2023 ?>
+    <?define UpgradeCode = "DE3EB1A0-2023-4A5B-9C0D-A1B2C3D4E5F3" ?>
+  <?elseif $(var.RevitVersion) = 2024 ?>
+    <?define UpgradeCode = "DE3EB1A0-2024-4A5B-9C0D-A1B2C3D4E5F4" ?>
+  <?elseif $(var.RevitVersion) = 2025 ?>
+    <?define UpgradeCode = "DE3EB1A0-2025-4A5B-9C0D-A1B2C3D4E5F5" ?>
+  <?elseif $(var.RevitVersion) = 2026 ?>
+    <?define UpgradeCode = "DE3EB1A0-2026-4A5B-9C0D-A1B2C3D4E5F6" ?>
+  <?else ?>
+    <?define UpgradeCode = "DE3EB1A0-9999-4A5B-9C0D-A1B2C3D4E5FF" ?>
+  <?endif ?>
+
+  <Package
+    Name="DeepBim-MCP for Revit $(var.RevitVersion)"
+    Manufacturer="DeepBim-MCP - Nguyen Ngoc Due"
+    Version="$(var.ProductVersion).0"
+    UpgradeCode="$(var.UpgradeCode)"
+    Scope="perUser">
+
+    <SummaryInformation
+      Description="DeepBim-MCP - AI-Powered BIM Automation for Revit $(var.RevitVersion)" />
+
+    <MajorUpgrade
+      DowngradeErrorMessage="A newer version of DeepBim-MCP for Revit $(var.RevitVersion) is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.InstallerBannerImage)" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.InstallerDialogImage)" />
+
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="ADDINFOLDER" />
+
+    <!-- ============================================================ -->
+    <!-- Directory structure                                          -->
+    <!-- %APPDATA%\Autodesk\Revit\Addins\{RevitVersion}\             -->
+    <!-- ============================================================ -->
+    <StandardDirectory Id="AppDataFolder">
+      <Directory Id="DIR_Autodesk" Name="Autodesk">
+        <Directory Id="DIR_Revit" Name="Revit">
+          <Directory Id="DIR_Addins" Name="Addins">
+            <Directory Id="ADDINFOLDER" Name="$(var.RevitVersion)">
+
+              <!-- .addin manifest -->
+              <Component Id="Comp_AddinManifest" Guid="*">
+                <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin.addin" KeyPath="yes" />
+              </Component>
+
+              <!-- DeepBimRevitMCPlugin\ -->
+              <Directory Id="DIR_Plugin" Name="DeepBimRevitMCPlugin">
+
+                <!-- server\ (Node.js MCP server build output) -->
+                <Directory Id="DIR_Server" Name="server" />
+
+                <!-- Core DLLs - each in its own component -->
+                <Component Id="Comp_RevitMCPPlugin" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\RevitMCPPlugin.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_RevitMCPSDK" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\RevitMCPSDK.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_CommandDeepBimMCPTools" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\CommandDeepBimMCPTools.dll" KeyPath="yes" />
+                </Component>
+
+                <!-- Third-party dependencies -->
+                <Component Id="Comp_ClosedXML" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\ClosedXML.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_ClosedXMLParser" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\ClosedXML.Parser.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_DocumentFormatOpenXml" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\DocumentFormat.OpenXml.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_DocumentFormatOpenXmlFw" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\DocumentFormat.OpenXml.Framework.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_ExcelNumberFormat" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\ExcelNumberFormat.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_SixLabors" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\SixLabors.Fonts.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_RBush" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\RBush.dll" KeyPath="yes" />
+                </Component>
+
+                <!-- Windows SDK -->
+                <Component Id="Comp_WinSDK" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\Microsoft.Windows.SDK.NET.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_WinRT" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\WinRT.Runtime.dll" KeyPath="yes" />
+                </Component>
+
+                <!-- .NET Framework 4.8 backport assemblies (Revit 2024 and earlier, not needed on .NET 8) -->
+                <?if $(var.RevitVersion) != 2025 and $(var.RevitVersion) != 2026 ?>
+                <Component Id="Comp_BclHashCode" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\Microsoft.Bcl.HashCode.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_SysBuffers" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\System.Buffers.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_SysDiagSource" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\System.Diagnostics.DiagnosticSource.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_SysIOPkg" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\System.IO.Packaging.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_SysMemory" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\System.Memory.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_SysNumVectors" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\System.Numerics.Vectors.dll" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_SysRTCompilerServices" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\System.Runtime.CompilerServices.Unsafe.dll" KeyPath="yes" />
+                </Component>
+                <?endif ?>
+
+                <!-- Configuration files -->
+                <Component Id="Comp_RevitVersionsJson" Guid="*">
+                  <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\RevitVersions.json" KeyPath="yes" />
+                </Component>
+                <Component Id="Comp_EnvJson" Guid="*">
+                  <File Source="deepbim-mcp.env.json" KeyPath="yes" />
+                </Component>
+
+                <!-- Commands\ -->
+                <Directory Id="DIR_Commands" Name="Commands">
+
+                  <Component Id="Comp_CommandRegistry" Guid="*">
+                    <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\Commands\commandRegistry.json" KeyPath="yes" />
+                  </Component>
+
+                  <!-- Commands\RevitMCPCommandSet\ -->
+                  <Directory Id="DIR_CommandSet" Name="RevitMCPCommandSet">
+
+                    <Component Id="Comp_CommandJson" Guid="*">
+                      <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\Commands\RevitMCPCommandSet\command.json" KeyPath="yes" />
+                    </Component>
+
+                    <!-- Commands\RevitMCPCommandSet\{RevitVersion}\ -->
+                    <Directory Id="DIR_CommandSetVersion" Name="$(var.RevitVersion)">
+                      <Component Id="Comp_CommandSetDll" Guid="*">
+                        <File Source="$(var.PluginSourceDir)\DeepBimRevitMCPlugin\Commands\RevitMCPCommandSet\$(var.RevitVersion)\RevitMCPCommandSet.dll" KeyPath="yes" />
+                      </Component>
+                    </Directory>
+
+                  </Directory>
+                </Directory>
+
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Feature -->
+    <Feature Id="Feature_Main"
+             Title="DeepBim-MCP for Revit $(var.RevitVersion)"
+             Level="1">
+      <ComponentRef Id="Comp_AddinManifest" />
+      <ComponentRef Id="Comp_RevitMCPPlugin" />
+      <ComponentRef Id="Comp_RevitMCPSDK" />
+      <ComponentRef Id="Comp_CommandDeepBimMCPTools" />
+      <ComponentRef Id="Comp_ClosedXML" />
+      <ComponentRef Id="Comp_ClosedXMLParser" />
+      <ComponentRef Id="Comp_DocumentFormatOpenXml" />
+      <ComponentRef Id="Comp_DocumentFormatOpenXmlFw" />
+      <ComponentRef Id="Comp_ExcelNumberFormat" />
+      <ComponentRef Id="Comp_SixLabors" />
+      <ComponentRef Id="Comp_RBush" />
+      <ComponentRef Id="Comp_WinSDK" />
+      <ComponentRef Id="Comp_WinRT" />
+      <?if $(var.RevitVersion) != 2025 and $(var.RevitVersion) != 2026 ?>
+      <ComponentRef Id="Comp_BclHashCode" />
+      <ComponentRef Id="Comp_SysBuffers" />
+      <ComponentRef Id="Comp_SysDiagSource" />
+      <ComponentRef Id="Comp_SysIOPkg" />
+      <ComponentRef Id="Comp_SysMemory" />
+      <ComponentRef Id="Comp_SysNumVectors" />
+      <ComponentRef Id="Comp_SysRTCompilerServices" />
+      <?endif ?>
+      <ComponentRef Id="Comp_RevitVersionsJson" />
+      <ComponentRef Id="Comp_EnvJson" />
+      <ComponentRef Id="Comp_CommandRegistry" />
+      <ComponentRef Id="Comp_CommandJson" />
+      <ComponentRef Id="Comp_CommandSetDll" />
+      <ComponentGroupRef Id="ServerBuildFiles" />
+      <ComponentGroupRef Id="ServerNodeModulesFiles" />
+    </Feature>
+
+  </Package>
+</Wix>
