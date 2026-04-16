@@ -15,19 +15,7 @@ primary
 lastDtbSucceeded
 
 [properties]
-AssemblyName=RevitMCPPlugin
 CommandLineArgsForDesignTimeEvaluation=-langversion:latest -define:TRACE
-CompilerGeneratedFilesOutputPath=
-MaxSupportedLangVersion=12.0
-ProjectAssetsFile=<PATH>obj/project.assets.json
-RootNamespace=revit_mcp_plugin
-RunAnalyzers=
-RunAnalyzersDuringLiveAnalysis=
-SolutionPath=<PATH>../revit-mcp-plugin.sln
-TargetFrameworkIdentifier=.NETCoreApp
-TargetPath=<PATH>bin/Debug/net8.0-windows10.0.19041.0/RevitMCPPlugin.dll
-TargetRefPath=<PATH>obj/Debug/net8.0-windows10.0.19041.0/ref/RevitMCPPlugin.dll
-TemporaryDependencyNodeTargetIdentifier=net8.0-windows10.0.19041.0
 
 [commandLineArguments]
 /noconfig

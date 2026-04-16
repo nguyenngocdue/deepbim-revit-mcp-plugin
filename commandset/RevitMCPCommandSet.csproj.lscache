@@ -15,19 +15,7 @@ primary
 lastDtbSucceeded
 
 [properties]
-AssemblyName=RevitMCPCommandSet
 CommandLineArgsForDesignTimeEvaluation=-langversion:latest -define:TRACE;REVIT2022_OR_GREATER;REVIT2023_OR_GREATER;REVIT2024_OR_GREATER;REVIT2025_OR_GREATER
-CompilerGeneratedFilesOutputPath=
-MaxSupportedLangVersion=12.0
-ProjectAssetsFile=<PATH>obj/project.assets.json
-RootNamespace=RevitMCPCommandSet
-RunAnalyzers=
-RunAnalyzersDuringLiveAnalysis=
-SolutionPath=<PATH>../revit-mcp-plugin.sln
-TargetFrameworkIdentifier=.NETCoreApp
-TargetPath=<PATH>bin/Debug/net8.0-windows10.0.19041.0/RevitMCPCommandSet.dll
-TargetRefPath=<PATH>obj/Debug/net8.0-windows10.0.19041.0/ref/RevitMCPCommandSet.dll
-TemporaryDependencyNodeTargetIdentifier=net8.0-windows10.0.19041.0
 
 [commandLineArguments]
 /noconfig
@@ -86,6 +74,8 @@ Commands/
  TagRoomsCommand.cs
  TagWallsCommand.cs
  Test/
+  HelloWorldCommand.cs
+  SayHello2Command.cs
   SayHelloCommand.cs
   SayHelloV2Command.cs
 GlobalUsings.cs
@@ -180,7 +170,9 @@ Services/
  GetCurrentViewElementsEventHandler.cs
  GetCurrentViewInfoEventHandler.cs
  GetSelectedElementsEventHandler.cs
+ HelloWorldEventHandler.cs
  OperateElementEventHandler.cs
+ SayHello2EventHandler.cs
  SayHelloEventHandler.cs
  SayHelloV2EventHandler.cs
  TagRoomsEventHandler.cs
