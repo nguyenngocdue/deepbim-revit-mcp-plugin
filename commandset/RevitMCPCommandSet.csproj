@@ -30,7 +30,6 @@
         <PackageReference Include="ClosedXML" Version="0.104.1" />
 		
 		<!-- Reference to the shared command library project -->
-		<ProjectReference Include="..\DevTooV2lCommands\DevToolV2Commands.csproj" />
 		
     </ItemGroup>
 
