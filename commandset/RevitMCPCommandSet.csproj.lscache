@@ -77,7 +77,6 @@ Commands/
   HelloWorldCommand.cs
   SayHello2Command.cs
   SayHelloCommand.cs
-  SayHelloV2Command.cs
 GlobalUsings.cs
 Models/
  AIResult.cs
@@ -187,7 +186,6 @@ Utils/
  TransactionUtils.cs
 
 [metadataReferences]
-../DevTooV2lCommands/obj/Debug/net8.0-windows10.0.19041.0/ref/DevToolV2Commands.dll
 <NUGET>/
  closedxml.parser/1.2.0/lib/netstandard2.1/ClosedXML.Parser.dll
  closedxml/0.104.1/lib/netstandard2.1/ClosedXML.dll
