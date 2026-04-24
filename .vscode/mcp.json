@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "deepbim-mcp-server-http": {
+      "type": "http",
+      "url": "https://revit-mcp-server.onrender.com/mcp"
+    }
+  }
+}

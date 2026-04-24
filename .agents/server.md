@@ -87,18 +87,68 @@ revit-mcp-server/
 4. Handler calls `withRevitConnection(client => client.sendCommand("command_name", args))`
 5. `register.ts` picks it up automatically — no import needed
 
+## Connecting to Revit Plugin (Port Forwarding)
+
+When the MCP server runs in the **cloud** (Render.com), it cannot reach `localhost:8080` of the user's machine.
+Use a **TCP tunnel** to expose the Revit plugin port publicly.
+
+### Setup with ngrok
+
+```bash
+# 1. Expose Revit plugin port via ngrok TCP tunnel
+ngrok tcp 8080
+# → Forwarding: tcp://0.tcp.ngrok.io:12345
+
+# 2. Set env vars on Render.com (or .env for local testing)
+REVIT_HOST=0.tcp.ngrok.io
+REVIT_PORT=12345
+```
+
+### How it works
+
+```
+AI Client (Claude/Cursor)
+    │ HTTP POST /mcp
+    ▼
+Render.com (MCP Server)
+    │ TCP  0.tcp.ngrok.io:12345   ← REVIT_HOST / REVIT_PORT
+    ▼
+ngrok tunnel
+    │ TCP localhost:8080
+    ▼
+Revit Plugin (user's machine)
+```
+
+- If `REVIT_HOST` / `REVIT_PORT` are **not set** → auto-scan `localhost:8080-8099` (default, local mode)
+- If **set** → connect directly to that host:port (skip scan)
+
+### Alternatives to ngrok
+
+| Tool | Command | Notes |
+|------|---------|-------|
+| **ngrok** | `ngrok tcp 8080` | Free tier available |
+| **cloudflared** | `cloudflare tunnel --url tcp://localhost:8080` | Cloudflare free |
+| **VS Code Port Forwarding** | Forward port 8080 in VS Code | Works with GitHub account |
+
+---
+
 ## Build & Run
 
 ```bash
 pnpm install
 pnpm build          # tsc → build/
 
-# stdio (local)
+# stdio (local, no env vars needed)
 node build/index.js
 
-# HTTP (port 3000)
+# HTTP mode (port 3000)
 PORT=3000 node build/index.js
+
+# HTTP mode + connect to remote Revit via ngrok
+PORT=3000 REVIT_HOST=0.tcp.ngrok.io REVIT_PORT=12345 node build/index.js
 
 # Inspect with MCP Inspector
 pnpm inspect
 ```
+
+Copy `.env.example` → `.env` and fill in values before running.
