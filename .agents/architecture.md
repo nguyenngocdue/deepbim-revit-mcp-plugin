@@ -131,10 +131,20 @@ revit-mcp-plugin/
 │   ├── DevToolV2Commands.csproj
 │   └── Commands/TestSayHelloCommand.cs
 │
-├── installers/msi/                ← WiX MSI installer project
+├── installers/msi/                ← WiX MSI installer project and MSI export script
+│   ├── Build-Installer.ps1        ← Main MSI build/export entry point
+│   ├── DeepBimMCP.Installer.wixproj ← WiX v5 project, x64 MSI, defines WiX constants
+│   ├── Product.wxs                ← Package, directories, feature/component refs
+│   ├── ServerFiles.wxs            ← Generated server build/ payload fragment
+│   ├── ServerNodeModules.wxs      ← Generated production node_modules payload fragment
+│   ├── ServerPublic.wxs           ← Generated server public/ payload fragment
+│   ├── ServerViews.wxs            ← Generated server views/ payload fragment
+│   └── output/                    ← Final copied MSI files
 ├── images/                        ← Icons for Ribbon UI
 └── scripts/
     ├── Build-RevitVersions.ps1
     ├── Generate-RevitVersionProps.ps1
     └── check-revit-mcp-connection.ps1
 ```
+
+MSI installer build/export details live in `installer-msi.md`.

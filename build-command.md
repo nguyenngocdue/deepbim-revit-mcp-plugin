@@ -1,17 +1,35 @@
-# 1. Build MSI cho tất cả các version (từ RevitVersions.json)
-.\installers\msi\Build-Installer.ps1
+# Build MSI Steps
 
-# 2. Build MSI cho Revit 2025 cụ thể
-.\installers\msi\Build-Installer.ps1 -Versions 2025
+## Build Revit 2026 v3.0.0
 
-# 3. Build cho nhiều version
-.\installers\msi\Build-Installer.ps1 -Versions 2024,2025
+```powershell
+# 1. Open PowerShell in the project folder
+cd "E:\C# Tool Revit\revit-mcp\mcp-addin\revit-mcp-plugin"
 
-# 4. Build với configuration Release (mặc định)
-.\installers\msi\Build-Installer.ps1 -Configuration Release
+# 2. Build the MSI
+.\scripts\Build-OneMsi.ps1 -RevitVersion 2026 -ProductVersion 3.0.0
 
-# 5. Build với phiên bản sản phẩm tùy chỉnh
-.\installers\msi\Build-Installer.ps1 -Versions 2025 -ProductVersion 2.0.0
+# 3. Verify the MSI output
+Test-Path ".\installers\msi\output\DeepBimMCP-Revit2026-v3.0.0.msi"
+```
 
-# 6. Skip build plugin (dùng output hiện có)
-.\installers\msi\Build-Installer.ps1 -Versions 2025 -SkipBuild
+## Change Version
+
+```powershell
+# Revit 2024
+.\scripts\Build-OneMsi.ps1 -RevitVersion 2024 -ProductVersion 3.0.0
+
+# Revit 2025
+.\scripts\Build-OneMsi.ps1 -RevitVersion 2025 -ProductVersion 3.0.0
+
+# Revit 2026
+.\scripts\Build-OneMsi.ps1 -RevitVersion 2026 -ProductVersion 3.0.0
+```
+
+## Rebuild MSI Only
+
+Use this only when the add-in payload already exists.
+
+```powershell
+.\scripts\Build-OneMsi.ps1 -RevitVersion 2026 -ProductVersion 3.0.0 -SkipPluginBuild
+```
