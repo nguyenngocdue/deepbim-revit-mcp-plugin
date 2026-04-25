@@ -79,6 +79,7 @@ obj/Debug/net8.0-windows10.0.19041.0/
   SettingsWindow.g.cs
   ToolWindow.g.cs
 UI/
+ BrandingAssets.cs
  CommandSetSettingsPage.xaml.cs
  ExportSheetsView.xaml.cs
  MCPStatusWindow.xaml.cs

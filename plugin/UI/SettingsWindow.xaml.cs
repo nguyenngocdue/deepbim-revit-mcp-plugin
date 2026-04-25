@@ -1,7 +1,5 @@
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shell;
 
 namespace revit_mcp_plugin.UI
@@ -33,13 +31,7 @@ namespace revit_mcp_plugin.UI
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             UpdateClip();
-            try
-            {
-                var uri = new System.Uri("pack://application:,,,/RevitMCPPlugin;component/Resources/icon.png", System.UriKind.Absolute);
-                TitleBarIcon.Source = BitmapFrame.Create(uri);
-                Icon = BitmapFrame.Create(uri);
-            }
-            catch { /* icon optional */ }
+            BrandingAssets.Apply(this, TitleBarIcon);
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)

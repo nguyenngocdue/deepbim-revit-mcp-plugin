@@ -72,8 +72,9 @@
         <!-- Copy RevitVersions.json so PathManager can read revitVersions at runtime -->
         <Copy SourceFiles="$(ProjectDir)..\RevitVersions.json" DestinationFolder="$(AddinDir)" Condition="Exists('$(ProjectDir)..\RevitVersions.json')" />
 
-        <!-- Dev: when running from AddIn folder, plugin loads Commands from here -->
+        <!-- Environment marker consumed by PathManager at runtime. -->
         <Copy SourceFiles="$(ProjectDir)env.dev.json" DestinationFiles="$(AddinDir)deepbim-mcp.env.json" Condition="'$(BaseConfiguration)'=='Debug'" />
+        <Copy SourceFiles="$(ProjectDir)env.deploy.json" DestinationFiles="$(AddinDir)deepbim-mcp.env.json" Condition="'$(BaseConfiguration)'!='Debug'" />
 
         <!-- MCP server build output -->
         <ItemGroup Condition="Exists('$(ServerBuildDir)index.js')">
