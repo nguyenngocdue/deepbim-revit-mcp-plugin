@@ -20,6 +20,8 @@ namespace revit_mcp_plugin.Core
         private static SocketService _instance;
         private TcpListener _listener;
         private Thread _listenerThread;
+        private HttpListener _httpListener;
+        private Thread _httpListenerThread;
         private bool _isRunning;
         private int _port = 8080;
         private UIApplication _uiApp;
@@ -49,6 +51,7 @@ namespace revit_mcp_plugin.Core
 
         private const int DEFAULT_PORT = 8080;
         private const int MAX_PORT = 8099;
+        private const int HTTP_PORT = 9080;
         private static readonly string PortFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "DeepBim-MCP", "mcp-port.txt");
@@ -96,6 +99,10 @@ namespace revit_mcp_plugin.Core
 
                     SaveLastPort(port);
                     _logger.Info($"TCP server listening on port {_port}");
+
+                    // Also start HTTP listener on fixed port 9080
+                    StartHttp(HTTP_PORT);
+
                     return;
                 }
                 catch (SocketException)
@@ -106,6 +113,138 @@ namespace revit_mcp_plugin.Core
             }
 
             throw new Exception($"No available port in range {DEFAULT_PORT}-{MAX_PORT}. All are in use.");
+        }
+
+        /// <summary>Start HTTP listener for remote access (e.g. via Cloudflare Tunnel).</summary>
+        public void StartHttp(int httpPort)
+        {
+            try
+            {
+                // Use TcpListener to avoid HttpListener permission issues on Windows
+                var tcpHttp = new TcpListener(IPAddress.Any, httpPort);
+                tcpHttp.Start();
+
+                var thread = new Thread(() => AcceptHttpConnections(tcpHttp))
+                {
+                    IsBackground = true,
+                    Name = "HttpRawListener"
+                };
+                thread.Start();
+
+                _logger.Info($"HTTP server listening on port {httpPort}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to start HTTP server on port {httpPort}: {ex.Message}");
+            }
+        }
+
+        private void AcceptHttpConnections(TcpListener tcpHttp)
+        {
+            while (_isRunning)
+            {
+                try
+                {
+                    var client = tcpHttp.AcceptTcpClient();
+                    ThreadPool.QueueUserWorkItem(_ => HandleRawHttpClient(client));
+                }
+                catch { break; }
+            }
+        }
+
+        private void HandleRawHttpClient(TcpClient client)
+        {
+            try
+            {
+                using (client)
+                using (var stream = client.GetStream())
+                {
+                    // Read HTTP request
+                    var requestBytes = new System.Collections.Generic.List<byte>();
+                    var buf = new byte[4096];
+                    string requestText = "";
+
+                    // Read until we have full headers + body
+                    int totalRead = 0;
+                    while (true)
+                    {
+                        int n = stream.Read(buf, 0, buf.Length);
+                        if (n == 0) break;
+                        totalRead += n;
+                        requestText += Encoding.UTF8.GetString(buf, 0, n);
+                        // Check if we have full HTTP request
+                        int headerEnd = requestText.IndexOf("\r\n\r\n");
+                        if (headerEnd < 0) continue;
+                        // Parse Content-Length
+                        int contentLength = 0;
+                        foreach (var line in requestText.Substring(0, headerEnd).Split('\n'))
+                        {
+                            if (line.StartsWith("Content-Length:", StringComparison.OrdinalIgnoreCase))
+                            {
+                                int.TryParse(line.Split(':')[1].Trim(), out contentLength);
+                            }
+                        }
+                        string body = requestText.Substring(headerEnd + 4);
+                        if (body.Length >= contentLength) break;
+                    }
+
+                    // Parse method and path
+                    string firstLine = requestText.Split('\n')[0].Trim();
+                    string method = firstLine.Split(' ')[0];
+                    string path = firstLine.Split(' ').Length > 1 ? firstLine.Split(' ')[1] : "/";
+
+                    string corsHeaders =
+                        "Access-Control-Allow-Origin: *\r\n" +
+                        "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n" +
+                        "Access-Control-Allow-Headers: Content-Type\r\n";
+
+                    string responseBody;
+                    int statusCode;
+
+                    if (method == "OPTIONS")
+                    {
+                        SendHttpResponse(stream, 204, "", corsHeaders);
+                        return;
+                    }
+                    else if (method == "GET")
+                    {
+                        responseBody = $"{{\"status\":\"running\",\"port\":{_port},\"httpPort\":{HTTP_PORT}}}";
+                        statusCode = 200;
+                    }
+                    else if (method == "POST")
+                    {
+                        int bodyStart = requestText.IndexOf("\r\n\r\n") + 4;
+                        string jsonBody = requestText.Substring(bodyStart);
+                        responseBody = ProcessJsonRPCRequest(jsonBody);
+                        statusCode = 200;
+                    }
+                    else
+                    {
+                        responseBody = "{\"error\":\"Method not allowed\"}";
+                        statusCode = 405;
+                    }
+
+                    SendHttpResponse(stream, statusCode, responseBody, corsHeaders);
+                }
+            }
+            catch { }
+        }
+
+        private void SendHttpResponse(NetworkStream stream, int statusCode, string body, string extraHeaders = "")
+        {
+            byte[] bodyBytes = Encoding.UTF8.GetBytes(body);
+            string statusText = statusCode == 200 ? "OK" : statusCode == 204 ? "No Content" : statusCode == 405 ? "Method Not Allowed" : "Error";
+            string response =
+                $"HTTP/1.1 {statusCode} {statusText}\r\n" +
+                "Content-Type: application/json; charset=utf-8\r\n" +
+                $"Content-Length: {bodyBytes.Length}\r\n" +
+                "Connection: close\r\n" +
+                extraHeaders +
+                "\r\n";
+            byte[] headerBytes = Encoding.UTF8.GetBytes(response);
+            stream.Write(headerBytes, 0, headerBytes.Length);
+            if (bodyBytes.Length > 0)
+                stream.Write(bodyBytes, 0, bodyBytes.Length);
         }
 
         /// <summary>Try last used port first, then 8080, 8081, ... 8099.</summary>
@@ -157,26 +296,20 @@ namespace revit_mcp_plugin.Core
         {
             _isRunning = false;
 
-            try
-            {
-                _listener?.Stop();
-            }
-            catch { }
-
-            try
-            {
-                _listener?.Server?.Close();
-                _listener?.Server?.Dispose();
-            }
-            catch { }
-
+            try { _listener?.Stop(); } catch { }
+            try { _listener?.Server?.Close(); _listener?.Server?.Dispose(); } catch { }
             _listener = null;
 
+            try { _httpListener?.Stop(); } catch { }
+            _httpListener = null;
+
             if (_listenerThread != null && _listenerThread.IsAlive)
-            {
                 _listenerThread.Join(2000);
-            }
             _listenerThread = null;
+
+            if (_httpListenerThread != null && _httpListenerThread.IsAlive)
+                _httpListenerThread.Join(2000);
+            _httpListenerThread = null;
         }
 
         private void ListenForClients()

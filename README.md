@@ -208,6 +208,12 @@ revit-mcp-plugin/
 
 See [CLAUDE-SETUP.md](CLAUDE-SETUP.md) and [KET-NOI-CLAUDE-REVIT.md](KET-NOI-CLAUDE-REVIT.md) for detailed setup and connection guides.
 
+
+RUN HTTP
+cloudflared tunnel --url http://localhost:9080
+check port: 9080 Invoke-WebRequest http://localhost:9080
+
+
 ## Reference
 
 This project is inspired by and references the following open-source project:

@@ -85,7 +85,6 @@ Commands/
  TagWallsCommand.cs
  Test/
   HelloWorldCommand.cs
-  SayHello2Command.cs
   SayHelloCommand.cs
 GlobalUsings.cs
 Models/
