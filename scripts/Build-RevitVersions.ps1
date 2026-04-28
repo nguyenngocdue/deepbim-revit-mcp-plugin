@@ -28,6 +28,17 @@ param(
 $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $rootDir  = Split-Path -Parent $scriptDir
+$dotnetPath = (Get-Command dotnet -ErrorAction SilentlyContinue).Source
+if (-not $dotnetPath) {
+    $dotnetCandidates = @(
+        (Join-Path $env:ProgramFiles 'dotnet\dotnet.exe'),
+        (Join-Path ${env:ProgramFiles(x86)} 'dotnet\dotnet.exe')
+    )
+    $dotnetPath = $dotnetCandidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+}
+if (-not $dotnetPath) {
+    throw "dotnet was not found on PATH or in the standard Program Files locations."
+}
 
 if (-not $SolutionPath) {
     $SolutionPath = Join-Path $rootDir 'revit-mcp-plugin.sln'
@@ -66,12 +77,21 @@ Write-Host "Configuration: $Configuration" -ForegroundColor Cyan
 
 foreach ($ver in $versionList) {
     Write-Host "`n--- Revit $ver ---" -ForegroundColor Green
-    $r = dotnet build $SolutionPath -c $Configuration -p:RevitVersion=$ver --no-incremental 2>&1
+    $buildArgs = @(
+        'build', $SolutionPath,
+        '-c', $Configuration,
+        "-p:RevitVersion=$ver",
+        '--no-incremental'
+    )
+    Write-Host "$dotnetPath $($buildArgs -join ' ')" -ForegroundColor DarkGray
+    $r = & $dotnetPath @buildArgs 2>&1
+    $success = $?
     $exitCode = $LASTEXITCODE
-    if ($exitCode -ne 0) {
+    if (-not $success -or ($null -ne $exitCode -and $exitCode -ne 0)) {
         $r | Write-Host
-        Write-Host "Build failed for Revit $ver (exit code $exitCode)." -ForegroundColor Red
-        exit $exitCode
+        $displayExitCode = if ($null -ne $exitCode) { $exitCode } else { 1 }
+        Write-Host "Build failed for Revit $ver (exit code $displayExitCode)." -ForegroundColor Red
+        exit $displayExitCode
     }
     Write-Host "Revit $ver OK." -ForegroundColor Green
 }

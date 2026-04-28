@@ -17,13 +17,13 @@ Test-Path ".\installers\msi\output\DeepBimMCP-Revit2026-v3.0.0.msi"
 
 ```powershell
 # Revit 2024
-.\scripts\Build-OneMsi.ps1 -RevitVersion 2024 -ProductVersion 3.0.0
+.\scripts\Build-OneMsi.ps1 -RevitVersion 2024 -ProductVersion 3.0.0 -Configuration Release
 
 # Revit 2025
-.\scripts\Build-OneMsi.ps1 -RevitVersion 2025 -ProductVersion 3.0.0
+.\scripts\Build-OneMsi.ps1 -RevitVersion 2025 -ProductVersion 3.0.0 -Configuration Release
 
 # Revit 2026
-.\scripts\Build-OneMsi.ps1 -RevitVersion 2026 -ProductVersion 3.0.0
+.\scripts\Build-OneMsi.ps1 -RevitVersion 2026 -ProductVersion 3.0.0 -Configuration Release
 ```
 
 ## Rebuild MSI Only

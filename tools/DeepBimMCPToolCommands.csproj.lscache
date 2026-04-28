@@ -260,10 +260,51 @@ Views/
  System.Xml.XmlSerializer.dll
  System.Xml.XPath.dll
  System.Xml.XPath.XDocument.dll
+<DOTNET>/packs/Microsoft.WindowsDesktop.App.Ref/8.0.25/ref/net8.0/
+ Accessibility.dll
+ Microsoft.Win32.Registry.AccessControl.dll
+ Microsoft.Win32.SystemEvents.dll
+ PresentationCore.dll
+ PresentationFramework.Aero.dll
+ PresentationFramework.Aero2.dll
+ PresentationFramework.AeroLite.dll
+ PresentationFramework.Classic.dll
+ PresentationFramework.dll
+ PresentationFramework.Luna.dll
+ PresentationFramework.Royale.dll
+ PresentationUI.dll
+ ReachFramework.dll
+ System.CodeDom.dll
+ System.Configuration.ConfigurationManager.dll
+ System.Diagnostics.EventLog.dll
+ System.Diagnostics.PerformanceCounter.dll
+ System.DirectoryServices.dll
+ System.IO.Packaging.dll
+ System.Printing.dll
+ System.Resources.Extensions.dll
+ System.Security.Cryptography.Pkcs.dll
+ System.Security.Cryptography.ProtectedData.dll
+ System.Security.Cryptography.Xml.dll
+ System.Security.Permissions.dll
+ System.Threading.AccessControl.dll
+ System.Windows.Controls.Ribbon.dll
+ System.Windows.Extensions.dll
+ System.Windows.Input.Manipulations.dll
+ System.Windows.Presentation.dll
+ System.Xaml.dll
+ UIAutomationClient.dll
+ UIAutomationClientSideProviders.dll
+ UIAutomationProvider.dll
+ UIAutomationTypes.dll
  WindowsBase.dll
 <NUGET>/microsoft.windows.sdk.net.ref/10.0.19041.57/lib/net8.0/
  Microsoft.Windows.SDK.NET.dll
  WinRT.Runtime.dll
+<NUGET>/
+ newtonsoft.json/13.0.3/lib/net6.0/Newtonsoft.Json.dll
+ nice3point.revit.api.revitapi/2026.4.0/ref/net8.0-windows7.0/RevitAPI.dll
+ nice3point.revit.api.revitapiui/2026.4.0/ref/net8.0-windows7.0/RevitAPIUI.dll
+ revitmcpsdk/2026.0.0.5/lib/net8.0-windows10.0.19041/RevitMCPSDK.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.NETCore.App.Ref/8.0.25/analyzers/dotnet/cs/
