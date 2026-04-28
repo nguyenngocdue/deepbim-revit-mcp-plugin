@@ -266,8 +266,8 @@ ViewModes/SayHelloViewModel.cs
  Microsoft.Windows.SDK.NET.dll
  WinRT.Runtime.dll
 <NUGET>/
- nice3point.revit.api.revitapi/2026.4.0/ref/net8.0-windows7.0/RevitAPI.dll
- nice3point.revit.api.revitapiui/2026.4.0/ref/net8.0-windows7.0/RevitAPIUI.dll
+ nice3point.revit.api.revitapi/2025.4.41/ref/net8.0-windows7.0/RevitAPI.dll
+ nice3point.revit.api.revitapiui/2025.4.41/ref/net8.0-windows7.0/RevitAPIUI.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.NETCore.App.Ref/8.0.25/analyzers/dotnet/cs/

@@ -185,7 +185,7 @@ namespace revit_mcp_plugin.Utils
                 }
                 catch { /* fallback to default */ }
             }
-            return new[] { "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019" };
+            return new[] { "2027", "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019" };
         }
 
         /// <summary>

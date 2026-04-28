@@ -6,7 +6,8 @@
         <ImplicitUsings>true</ImplicitUsings>
         <TargetFramework>$(RevitTFM)</TargetFramework>
         <DefineConstants>$(DefineConstants);REVIT2022_OR_GREATER;REVIT2023_OR_GREATER;REVIT2024_OR_GREATER;REVIT2025_OR_GREATER</DefineConstants>
-        <DefineConstants Condition="'$(RevitVersion)' == '2026'">$(DefineConstants);REVIT2026_OR_GREATER</DefineConstants>
+        <DefineConstants Condition="'$(RevitVersion)' == '2026' Or '$(RevitVersion)' == '2027'">$(DefineConstants);REVIT2026_OR_GREATER</DefineConstants>
+        <DefineConstants Condition="'$(RevitVersion)' == '2027'">$(DefineConstants);REVIT2027_OR_GREATER</DefineConstants>
         <AddinManifestName>DeepBimRevitMCPlugin.addin</AddinManifestName>
         <AddinFolderName>DeepBimRevitMCPlugin</AddinFolderName>
     </PropertyGroup>
@@ -26,7 +27,7 @@
         <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitVersion).*" />
         <PackageReference Include="Nice3point.Revit.Toolkit" Version="$(RevitVersion).*" />
         <PackageReference Include="Nice3point.Revit.Extensions" Version="$(RevitVersion).*" />
-        <PackageReference Include="RevitMCPSDK" Version="$(RevitVersion).*" />
+        <PackageReference Include="RevitMCPSDK" Version="$(RevitMCPSDKVersion)" />
         <PackageReference Include="ClosedXML" Version="0.104.1" />
 		
 		<!-- Reference to the shared command library project -->

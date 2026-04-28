@@ -25,9 +25,13 @@ $ErrorActionPreference = 'Stop'
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $rootDir = Split-Path -Parent $scriptDir
+$baseConfiguration = $Configuration
+if ($Configuration -match '^(Debug|Release)-\d{4}$') {
+    $baseConfiguration = $Matches[1]
+}
 $buildPluginScript = Join-Path $scriptDir 'Build-RevitVersions.ps1'
 $buildInstallerScript = Join-Path $rootDir 'installers\msi\Build-Installer.ps1'
-$addinRoot = Join-Path $rootDir "plugin\bin\AddIn $RevitVersion $Configuration"
+$addinRoot = Join-Path $rootDir "plugin\bin\AddIn $RevitVersion $baseConfiguration"
 $addinFolder = Join-Path $addinRoot 'DeepBimRevitMCPlugin'
 $commandSetDll = Join-Path $addinFolder "Commands\RevitMCPCommandSet\$RevitVersion\RevitMCPCommandSet.dll"
 $msiPath = Join-Path $rootDir "installers\msi\output\DeepBimMCP-Revit$RevitVersion-v$ProductVersion.msi"

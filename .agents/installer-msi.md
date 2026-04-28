@@ -138,3 +138,21 @@ Microsoft.Windows.SDK.NET.dll
 ```
 
 Those files are not always present in the Revit 2024 payload. In `Product.wxs`, include them only for versions that actually produce them.
+
+## Revit 2027 Packaging Note
+
+Revit 2027 uses a .NET 10 add-in payload, not .NET 8. See `revit-versions.md` for the 2027 framework/package matrix and API compatibility notes.
+
+When building 2027, first verify the add-in layout exists:
+
+```powershell
+.\scripts\Build-RevitVersions.ps1 -Versions 2027 -Configuration Release
+```
+
+Expected payload root:
+
+```text
+plugin\bin\AddIn 2027 Release\
+```
+
+Only build the MSI after that payload is present.

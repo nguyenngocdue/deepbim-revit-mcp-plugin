@@ -148,3 +148,5 @@ revit-mcp-plugin/
 ```
 
 MSI installer build/export details live in `installer-msi.md`.
+
+Revit version framework/API compatibility details live in `revit-versions.md`. In particular, Revit 2027 targets .NET 10 and has API changes compared with 2024-2026.

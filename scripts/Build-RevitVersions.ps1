@@ -41,7 +41,12 @@ if (-not $dotnetPath) {
 }
 
 if (-not $SolutionPath) {
-    $SolutionPath = Join-Path $rootDir 'revit-mcp-plugin.sln'
+    $buildTargets = @(
+        (Join-Path $rootDir 'commandset\RevitMCPCommandSet.csproj'),
+        (Join-Path $rootDir 'plugin\RevitMCPPlugin.csproj')
+    )
+} else {
+    $buildTargets = @($SolutionPath)
 }
 
 # Keep RevitVersion.generated.props in sync with RevitVersions.json (defaultVersion)
@@ -76,23 +81,40 @@ Write-Host "Building for Revit version(s): $($versionList -join ', ')" -Foregrou
 Write-Host "Configuration: $Configuration" -ForegroundColor Cyan
 
 foreach ($ver in $versionList) {
-    Write-Host "`n--- Revit $ver ---" -ForegroundColor Green
-    $buildArgs = @(
-        'build', $SolutionPath,
-        '-c', $Configuration,
-        "-p:RevitVersion=$ver",
-        '--no-incremental'
-    )
-    Write-Host "$dotnetPath $($buildArgs -join ' ')" -ForegroundColor DarkGray
-    $r = & $dotnetPath @buildArgs 2>&1
-    $success = $?
-    $exitCode = $LASTEXITCODE
-    if (-not $success -or ($null -ne $exitCode -and $exitCode -ne 0)) {
-        $r | Write-Host
-        $displayExitCode = if ($null -ne $exitCode) { $exitCode } else { 1 }
-        Write-Host "Build failed for Revit $ver (exit code $displayExitCode)." -ForegroundColor Red
-        exit $displayExitCode
+    $baseConfiguration = $Configuration
+    if ($Configuration -match '^(Debug|Release)-\d{4}$') {
+        $baseConfiguration = $Matches[1]
     }
+
+    Write-Host "`n--- Revit $ver ---" -ForegroundColor Green
+    foreach ($buildTarget in $buildTargets) {
+        $buildArgs = @(
+            'build', $buildTarget,
+            '-c', $Configuration,
+            "-p:RevitVersion=$ver",
+            '--no-incremental'
+        )
+        Write-Host "$dotnetPath $($buildArgs -join ' ')" -ForegroundColor DarkGray
+        $r = & $dotnetPath @buildArgs 2>&1
+        $success = $?
+        $exitCode = $LASTEXITCODE
+        if (-not $success -or ($null -ne $exitCode -and $exitCode -ne 0)) {
+            $r | Write-Host
+            $displayExitCode = if ($null -ne $exitCode) { $exitCode } else { 1 }
+            Write-Host "Build failed for Revit $ver (exit code $displayExitCode)." -ForegroundColor Red
+            Write-Host "Target: $buildTarget" -ForegroundColor Red
+            exit $displayExitCode
+        }
+    }
+
+    $addinManifest = Join-Path $rootDir "plugin\bin\AddIn $ver $baseConfiguration\DeepBimRevitMCPlugin.addin"
+    if (-not (Test-Path $addinManifest)) {
+        $r | Write-Host
+        Write-Host "Build completed but add-in payload was not generated for Revit $ver." -ForegroundColor Red
+        Write-Host "Missing: $addinManifest" -ForegroundColor Red
+        exit 1
+    }
+
     Write-Host "Revit $ver OK." -ForegroundColor Green
 }
 
