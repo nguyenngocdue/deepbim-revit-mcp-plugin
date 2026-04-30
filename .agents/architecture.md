@@ -48,6 +48,8 @@ revit-mcp-plugin/
 │   │   ├── Architecture/
 │   │   │   ├── CreateRoomCommand.cs
 │   │   │   └── CreateLevelCommand.cs
+│   │   ├── GetRevitContextCommand.cs  ← AI Runtime: reads model context (levels, units, selection, wall types)
+│   │   ├── ApplyOperationsCommand.cs  ← AI Runtime: executes list of primitive ops via OperationHandlerRegistry
 │   │   ├── AnnotationComponents/
 │   │   │   └── CreateDimensionCommand.cs
 │   │   ├── DataExtraction/
@@ -70,6 +72,16 @@ revit-mcp-plugin/
 │   │   ├── OperateElementCommand.cs
 │   │   ├── TagRoomsCommand.cs
 │   │   └── TagWallsCommand.cs
+│   ├── Operations/                ← IOperationHandler implementations (one file per primitive op, auto-discovered via reflection)
+│   │   ├── IOperationHandler.cs       ← interface: OpName, RequiredFields[], Execute(doc, op) → OperationResult
+│   │   ├── OperationHandlerRegistry.cs← static ctor scans Assembly, builds Dictionary<opName, IOperationHandler>
+│   │   ├── OperationUtils.cs          ← shared helpers: MmToFeet, ToXyzFromMm, GetElementId (cross-version)
+│   │   ├── CreateLevelOperation.cs
+│   │   ├── CreateGridLineOperation.cs
+│   │   ├── CreateWallByLevelOperation.cs
+│   │   ├── CreateColumnByLevelOperation.cs
+│   │   ├── CreateFloorByBoundaryOperation.cs
+│   │   └── CreateIsolatedFoundationOperation.cs
 │   ├── Services/                  ← IExternalEventHandler classes (run on Revit main thread)
 │   │   ├── Architecture/
 │   │   │   ├── CreateRoomEventHandler.cs
@@ -80,6 +92,8 @@ revit-mcp-plugin/
 │   │   │   ├── ExportRoomDataEventHandler.cs
 │   │   │   ├── GetMaterialQuantitiesEventHandler.cs
 │   │   │   └── AnalyzeModelStatisticsEventHandler.cs
+│   │   ├── GetRevitContextEventHandler.cs ← AI Runtime: returns document/view/units/selection/levels/wallTypes
+│   │   ├── ApplyOperationsEventHandler.cs  ← AI Runtime: dispatches ops via OperationHandlerRegistry (no hardcoded switch)
 │   │   ├── AIElementFilterEventHandler.cs
 │   │   ├── ColorSplashEventHandler.cs
 │   │   ├── CreateGridEventHandler.cs
@@ -99,6 +113,7 @@ revit-mcp-plugin/
 │   │   └── TagWallsEventHandler.cs
 │   ├── Models/                    ← DTOs shared between layers
 │   │   ├── AIResult.cs            ← Generic result wrapper: Success, Message, Response<T>
+│   │   ├── OperationResult.cs     ← Per-op result: Success, Message, ElementId? (used by IOperationHandler)
 │   │   ├── ElementInfo.cs         ← Element DTO: Id, Category, FamilyName, Properties dict
 │   │   ├── ViewInfoResult.cs      ← View DTO: Id, Name, ViewType, Scale
 │   │   ├── Common/                ← JZPoint (3D mm), JZLine, JZFace, FilterSetting, OperationSetting

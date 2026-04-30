@@ -17,7 +17,8 @@
 		"deepbim-mcp-server-revit": {
 			"type": "stdio",
 			"command": "node",
-			"args": []
+			"args": ["E:\\C# Tool Revit\\revit-mcp\\revit-mcp-server\\build\\index.js"]
+
 		}
 	},
 	"inputs": []
