@@ -31,6 +31,8 @@
     { "commandName": "create_dimensions", "description": "Create dimension annotations between elements or points", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "get_sheet_exportable_properties", "description": "Get list of sheet parameters that can be exported to Excel", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "export_sheets_to_excel", "description": "Export all sheets with selected properties to an Excel file", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
-    { "commandName": "hello_world", "description": "Show a hello world dialog in Revit with user's full name", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true }
+    { "commandName": "hello_world", "description": "Show a hello world dialog in Revit with user's full name", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "get_revit_context", "description": "Get Revit model context: document, active view, units, selection, levels, wall types", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "apply_operations", "description": "Apply a list of primitive operations to Revit model (preview or execute mode)", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true }
   ]
 }

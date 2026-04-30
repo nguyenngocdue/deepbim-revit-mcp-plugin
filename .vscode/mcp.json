@@ -1,16 +1,24 @@
 {
-  "servers": {
-    "deepbim-mcp-server-http": {
-      "type": "http",
-      "url": "https://revit-mcp-server.onrender.com/mcp"
-    },
-    "autocad-mcp": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["E:\\C# Tool Revit\\revit-mcp\\autocad-mcp-server\\build\\index.js"],
-      "env": {
-        "AUTOCAD_HTTP_URL": "http://localhost:9180"
-      }
-    }
-  }
+	"servers": {
+		"deepbim-mcp-server-http": {
+			"type": "http",
+			"url": "https://revit-mcp-server.onrender.com/mcp"
+		},
+		"autocad-mcp": {
+			"type": "stdio",
+			"command": "node",
+			"args": [
+				"E:\\C# Tool Revit\\revit-mcp\\autocad-mcp-server\\build\\index.js"
+			],
+			"env": {
+				"AUTOCAD_HTTP_URL": "http://localhost:9180"
+			}
+		},
+		"deepbim-mcp-server-revit": {
+			"type": "stdio",
+			"command": "node",
+			"args": []
+		}
+	},
+	"inputs": []
 }
