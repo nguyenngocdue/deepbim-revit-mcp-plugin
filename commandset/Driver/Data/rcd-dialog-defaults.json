@@ -1,0 +1,4 @@
+{
+  "_comment": "Default dialog auto-responses that are safe in any project: pure warnings that Revit lets the user dismiss with OK without changing the model. Anything about deleting, overwriting, saving, syncing, detaching or auditing is deliberately NOT here — the AI must set an explicit rule via rcd_dialog_policy. Match fields: dialogId (TaskDialog id), messageRegex. overrideResult: IDOK=1, IDCANCEL=2, IDYES=6, IDNO=7, or { \"commandLink\": n }.",
+  "rules": []
+}

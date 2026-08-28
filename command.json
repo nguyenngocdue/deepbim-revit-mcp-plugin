@@ -33,6 +33,12 @@
     { "commandName": "export_sheets_to_excel", "description": "Export all sheets with selected properties to an Excel file", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "hello_world", "description": "Show a hello world dialog in Revit with user's full name", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
     { "commandName": "get_revit_context", "description": "Get Revit model context: document, active view, units, selection, levels, wall types", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
-    { "commandName": "apply_operations", "description": "Apply a list of primitive operations to Revit model (preview or execute mode)", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true }
+    { "commandName": "apply_operations", "description": "Apply a list of primitive operations to Revit model (preview or execute mode)", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "rcd_list_commands", "description": "RCD: search catalog of postable Revit commands (PostableCommand + shortcuts)", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "rcd_post_command", "description": "RCD: prepare context, capture view mapping and PostCommand a Revit command", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "rcd_ui_input", "description": "RCD: drive mouse/keyboard into Revit (click model points, type, keys, wait for status)", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "rcd_ui_state", "description": "RCD: status bar, dialogs, foreground, element changes since marker", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "rcd_ui_cancel", "description": "RCD: escape current command, close dialogs, release driver lock", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true },
+    { "commandName": "rcd_dialog_policy", "description": "RCD: set/clear/list auto-response rules for Revit dialogs", "assemblyPath": "RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll", "enabled": true }
   ]
 }

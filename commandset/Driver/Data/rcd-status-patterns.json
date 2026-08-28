@@ -1,0 +1,18 @@
+{
+  "_comment": "Regex patterns (case-insensitive) that classify the Revit status bar text. 'idle' = no command is active. Add locales as needed; selected by rcd-settings.json statusLocale.",
+  "en": {
+    "idle": [
+      "^Click to select",
+      "^Ready$",
+      "^$"
+    ],
+    "prompts": {
+      "startPoint": "start point",
+      "endPoint": "end point",
+      "placeHost": "to place",
+      "reference": "reference",
+      "selectElements": "^Select (elements|an element|objects)",
+      "sketch": "(Finish|Cancel) (the )?sketch|sketch mode"
+    }
+  }
+}
